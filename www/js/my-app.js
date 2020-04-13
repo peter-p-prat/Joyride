@@ -33,6 +33,7 @@ var mainView = app.views.create('.view-main');
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
 
+    
 
 });
 
@@ -40,19 +41,31 @@ $$(document).on('deviceready', function() {
 $$(document).on('page:init', function (e) {
     // Do something here when page loaded and initialized
     console.log(e);
-})
+
+});
 
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
+
     
+     var panel = app.panel.create({
+          el: '.panel-registro',
+          on: {
+                opened: function () {
+                  console.log('Panel opened')
+                }
+              }
+    });
+
+
     $$('#enviarRegistro').on('click', function(){
-        var email = $$('#emailRegistro').val();
+        var correo = $$('#emailRegistro').val();
         var clave = $$('#claveRegistro').val();
         //Se declara la variable huboError (bandera)
         var huboError = 0; 
-        firebase.auth().createUserWithEmailAndPassword(email, clave)
+        firebase.auth().createUserWithEmailAndPassword(correo, clave)
             .catch(function(error) {
                 //Si hubo algun error, ponemos un valor referenciable en la variable huboError
                 huboError = 1;
@@ -71,14 +84,21 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
                     mainView.router.navigate("/index/");
+                    app.panel.close('.panel-registro', true);
                 }
             }); 
             // [END createwithemail]
-
-    })
-
+    });
 
 
+            var panel = app.panel.create({
+              el: '.panel-login',
+              on: {
+                    opened: function () {
+                      console.log('Panel opened')
+                    }
+                  }
+            });
 
 
     $$('#enviarLogin').on('click', function(){
@@ -101,14 +121,69 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
                     mainView.router.navigate("/index/");
+                    app.panel.close('.panel-login', true);
+
                 }
             }); 
+    });
+
+    var provider = new firebase.auth.GoogleAuthProvider();
+    $$("#google").on('click', function(){
+        firebase.auth().signInWithRedirect(provider)
+        .then(function(result) {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = result.credential.accessToken;
+          // The signed-in user info.
+          var user = result.user;
+          // ...
+          console.log("te logueaste"+ user);
+        }).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+          // ...
+        });
     })
+    
 });
+
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
+
+    // onSuccess Callback
+    // This method accepts a Position object, which contains the
+    // current GPS coordinates
+    //
+    var onSuccess = function(position) {
+        alert('Latitude: '          + position.coords.latitude          + '\n' +
+              'Longitude: '         + position.coords.longitude         + '\n' +
+              'Altitude: '          + position.coords.altitude          + '\n' +
+              'Accuracy: '          + position.coords.accuracy          + '\n' +
+              'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+              'Heading: '           + position.coords.heading           + '\n' +
+              'Speed: '             + position.coords.speed             + '\n' +
+              'Timestamp: '         + position.timestamp                + '\n');
+    };
+ 
+    // onError Callback receives a PositionError object
+    //
+    function onError(error) {
+        alert('code: '    + error.code    + '\n' +
+              'message: ' + error.message + '\n');
+    }
+ 
+    navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
+
+
+
+
     
 })
 
