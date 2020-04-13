@@ -60,35 +60,8 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     });
 
 
-    $$('#enviarRegistro').on('click', function(){
-        var correo = $$('#emailRegistro').val();
-        var clave = $$('#claveRegistro').val();
-        //Se declara la variable huboError (bandera)
-        var huboError = 0; 
-        firebase.auth().createUserWithEmailAndPassword(correo, clave)
-            .catch(function(error) {
-                //Si hubo algun error, ponemos un valor referenciable en la variable huboError
-                huboError = 1;
-                var errorCode = error.code;
-                var errorMessage = error.message;
-                // [START_EXCLUDE]
-                if (errorCode == 'auth/weak-password') {
-                  alert('The password is too weak.');
-                } else {
-                  alert(errorMessage);
-                }
-                console.log(error);
-                // [END_EXCLUDE]
-            })
-            .then(function(){   
-                //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
-                if(huboError == 0){
-                    mainView.router.navigate("/index/");
-                    app.panel.close('.panel-registro', true);
-                }
-            }); 
-            // [END createwithemail]
-    });
+    $$('#enviarRegistro').on('click', crearRegistro());
+    
 
 
             var panel = app.panel.create({
@@ -101,55 +74,12 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
             });
 
 
-    $$('#enviarLogin').on('click', function(){
-        var email = $$('#emailLogin').val();
-        var clave = $$('#claveLogin').val();
-       console.log(email);
-       console.log(clave);
-        //Se declara la variable huboError (bandera)
-        var huboError = 0;     
-        firebase.auth().signInWithEmailAndPassword(email, clave)
-            .catch(function(error){
-                //Si hubo algun error, ponemos un valor referenciable en la variable huboError
-                huboError = 1;
-                var errorCode = error.code;
-                var errorMessage = error.message;
-                console.error(errorMessage);
-                console.log(errorCode);
-            })
-            .then(function(){   
-                //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
-                if(huboError == 0){
-                    mainView.router.navigate("/index/");
-                    app.panel.close('.panel-login', true);
+    $$('#enviarLogin').on('click', Loguearse());
 
-                }
-            }); 
-    });
-
-    var provider = new firebase.auth.GoogleAuthProvider();
-    $$("#google").on('click', function(){
-        firebase.auth().signInWithRedirect(provider)
-        .then(function(result) {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          var token = result.credential.accessToken;
-          // The signed-in user info.
-          var user = result.user;
-          // ...
-          console.log("te logueaste"+ user);
-        }).catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // The email of the user's account used.
-          var email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          var credential = error.credential;
-          // ...
-        });
-    })
     
-});
+
+   
+    $$("#google").on('click', loginConGoogle());
 
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
@@ -160,6 +90,8 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
     // This method accepts a Position object, which contains the
     // current GPS coordinates
     //
+    
+    
     var onSuccess = function(position) {
         alert('Latitude: '          + position.coords.latitude          + '\n' +
               'Longitude: '         + position.coords.longitude         + '\n' +
@@ -191,7 +123,83 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
 /** FUNCIONES PROPIAS **/
 
 
+function crearRegistro(){
+        var correo = $$('#emailRegistro').val();
+        var clave = $$('#claveRegistro').val();
+        //Se declara la variable huboError (bandera)
+        var huboError = 0; 
+        firebase.auth().createUserWithEmailAndPassword(correo, clave)
+            .catch(function(error) {
+                //Si hubo algun error, ponemos un valor referenciable en la variable huboError
+                huboError = 1;
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                // [START_EXCLUDE]
+                if (errorCode == 'auth/weak-password') {
+                  alert('The password is too weak.');
+                } else {
+                  alert(errorMessage);
+                }
+                console.log(error);
+                // [END_EXCLUDE]
+            })
+            .then(function(){   
+                //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
+                if(huboError == 0){
+                    mainView.router.navigate("/index/");
+                    app.panel.close('.panel-registro', true);
+                }
+            }); 
+            // [END createwithemail]
+    };
 
+    function Loguearse(){
+        var correo = $$('#emailLogin').val();
+        var clave = $$('#claveLogin').val();
+       console.log(correo);
+       console.log(clave);
+        //Se declara la variable huboError (bandera)
+        var huboError = 0;     
+        firebase.auth().signInWithEmailAndPassword(correo, clave)
+            .catch(function(error){
+                //Si hubo algun error, ponemos un valor referenciable en la variable huboError
+                huboError = 1;
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                console.error(errorMessage);
+                console.log(errorCode);
+            })
+            .then(function(){   
+                //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
+                if(huboError == 0){
+                    mainView.router.navigate("/index/");
+                    app.panel.close('.panel-login', true);
+
+                }
+            }); 
+    };
+
+    function loginConGoogle(){
+        var provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithRedirect(provider)
+        .then(function(result) {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = result.credential.accessToken;
+          // The signed-in user info.
+          var user = result.user;
+          // ...
+          console.log("te logueaste"+ user);
+        }).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+          // ...
+        });
+    };
 
 
 /*
