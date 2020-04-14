@@ -126,11 +126,15 @@ function crearRegistro(){
                 if(huboError == 0){
                     mainView.router.navigate("/index/");
                     app.panel.close('.panel-registro', true);
-                    console.log("te registraste" + user)
+                    console.log("te registraste" + user);
+                    mensajeRegistro();
                 }
             }); 
             // [END createwithemail]
     };
+    function mensajeRegistro(){
+        console.log("te registraste");
+    }
 
     function Loguearse(){
         var correo = $$('#emailLogin').val();
@@ -155,9 +159,14 @@ function crearRegistro(){
                     mainView.router.navigate("/index/");
                     app.panel.close('.panel-login', true);
                     console.log("te Logueaste");
-
+                    mensajeLogin();
                 }
             }); 
+    };
+
+    function mensajeLogin(){
+        console.log("te Logueaste");
+        alert("te logueaste");
     };
 
     function loginConGoogle(){
@@ -169,6 +178,7 @@ function crearRegistro(){
           // The signed-in user info.
           var user = result.user;
           // ...
+          mensajesLoginGoogle();
           console.log("te logueaste "+ user);
           alert("te logueaste "+ user);
         })
@@ -181,7 +191,13 @@ function crearRegistro(){
           // The firebase.auth.AuthCredential type that was used.
           var credential = error.credential;
           // ...
+          mensajesLoginGoogle();
         });
+    };
+
+    function mensajesLoginGoogle(){
+          console.log("te logueaste "+ user);
+          alert("te logueaste "+ user);
     };
 
     function geolocalizacion(){
