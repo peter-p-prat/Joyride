@@ -85,32 +85,10 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
-
-    // onSuccess Callback
-    // This method accepts a Position object, which contains the
-    // current GPS coordinates
-    //
+    geolocalizacion();
+   
     
     
-    var onSuccess = function(position) {
-        alert('Latitude: '          + position.coords.latitude          + '\n' +
-              'Longitude: '         + position.coords.longitude         + '\n' +
-              'Altitude: '          + position.coords.altitude          + '\n' +
-              'Accuracy: '          + position.coords.accuracy          + '\n' +
-              'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
-              'Heading: '           + position.coords.heading           + '\n' +
-              'Speed: '             + position.coords.speed             + '\n' +
-              'Timestamp: '         + position.timestamp                + '\n');
-    };
- 
-    // onError Callback receives a PositionError object
-    //
-    function onError(error) {
-        alert('code: '    + error.code    + '\n' +
-              'message: ' + error.message + '\n');
-    }
- 
-    navigator.geolocation.getCurrentPosition(onSuccess, onError);
 
 
 
@@ -148,6 +126,7 @@ function crearRegistro(){
                 if(huboError == 0){
                     mainView.router.navigate("/index/");
                     app.panel.close('.panel-registro', true);
+                    console.log("te registraste" + user)
                 }
             }); 
             // [END createwithemail]
@@ -156,8 +135,7 @@ function crearRegistro(){
     function Loguearse(){
         var correo = $$('#emailLogin').val();
         var clave = $$('#claveLogin').val();
-       console.log(correo);
-       console.log(clave);
+
         //Se declara la variable huboError (bandera)
         var huboError = 0;     
         firebase.auth().signInWithEmailAndPassword(correo, clave)
@@ -168,12 +146,15 @@ function crearRegistro(){
                 var errorMessage = error.message;
                 console.error(errorMessage);
                 console.log(errorCode);
+                alert(errorMessage);
+                alert(errorCode);
             })
             .then(function(){   
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
                     mainView.router.navigate("/index/");
                     app.panel.close('.panel-login', true);
+                    console.log("te Logueaste");
 
                 }
             }); 
@@ -188,8 +169,10 @@ function crearRegistro(){
           // The signed-in user info.
           var user = result.user;
           // ...
-          console.log("te logueaste"+ user);
-        }).catch(function(error) {
+          console.log("te logueaste "+ user);
+          alert("te logueaste "+ user);
+        })
+        .catch(function(error) {
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
@@ -201,7 +184,43 @@ function crearRegistro(){
         });
     };
 
+    function geolocalizacion(){
 
+        // onSuccess Callback
+        // This method accepts a Position object, which contains the
+        // current GPS coordinates
+        //
+
+        var onSuccess = function(position) {
+            alert('Latitude: '          + position.coords.latitude          + '\n' +
+                  'Longitude: '         + position.coords.longitude         + '\n' +
+                  'Altitude: '          + position.coords.altitude          + '\n' +
+                  'Accuracy: '          + position.coords.accuracy          + '\n' +
+                  'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+                  'Heading: '           + position.coords.heading           + '\n' +
+                  'Speed: '             + position.coords.speed             + '\n' +
+                  'Timestamp: '         + position.timestamp                + '\n');
+            console.log('Latitude: '          + position.coords.latitude          + '\n' +
+                      'Longitude: '         + position.coords.longitude         + '\n' +
+                      'Altitude: '          + position.coords.altitude          + '\n' +
+                      'Accuracy: '          + position.coords.accuracy          + '\n' +
+                      'Altitude Accuracy: ' + position.coords.altitudeAccuracy  + '\n' +
+                      'Heading: '           + position.coords.heading           + '\n' +
+                      'Speed: '             + position.coords.speed             + '\n' +
+                      'Timestamp: '         + position.timestamp                + '\n');
+        };
+     
+        // onError Callback receives a PositionError object
+        //
+        function onError(error) {
+            alert('code: '    + error.code    + '\n' +
+                  'message: ' + error.message + '\n');
+        }
+     
+        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
+
+    };
 /*
 function fnTocaBoton() {
     var mensaje = "";
