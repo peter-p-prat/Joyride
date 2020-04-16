@@ -9,13 +9,20 @@
             * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
+        
     
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline'; font-src * data: URIs ">
-
+     -->
     <!-- Required meta tags-->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
+    type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
+    type="text/javascript" charset="utf-8"></script>
+
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <!-- Color theme for statusbar -->
     <meta name="theme-color" content="#2196f3">
@@ -153,13 +160,14 @@
                     
                     <div class="block">
                     <h3 >Contenido del Index</h3>
-                    <p id="tituloindex"></p>
+                    <p id="tituloindex">hola</p>
 
 
 
 
                     <!-- Link to another page -->
                     <a href="/about/" class="button button-round button-fill">Página About</a>
+                    <a href="/mapa/" class="button button-round button-fill">mapa</a>
 
 
                   <!--
@@ -282,6 +290,10 @@
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="lib/framework7/js/framework7.bundle.min.js"></script>
     <script type="text/javascript" src="js/my-app.js"></script>
+
+    
+
+
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>

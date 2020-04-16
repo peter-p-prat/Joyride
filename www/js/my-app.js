@@ -23,16 +23,33 @@ var app = new Framework7({
         path: '/about/',
         url: 'about.html',
       },
+      {
+        path: '/mapa/',
+        url: 'mapa prueba.html',
+      },
     ]
     // ... other parameters
   });
 
 var mainView = app.views.create('.view-main');
 
-var correo;
+var correo, clave;
+
+//variables para local
+var storage = window.localStorage;
+var usuario = { "email": "", "clave": "" };
+var usuarioLocal, claveLocal;
+var consultaLocal;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
+
+
+
+
+
+    consultarLocalStorage();
+    
 
     db = firebase.firestore();
     refUsuarios = db.collection("USUARIOS");
@@ -43,7 +60,7 @@ $$(document).on('deviceready', function() {
         fnIniciarDatos();
     }
 
-    
+
 
     var panel = app.panel.create({
           el: '.panel-registro',
@@ -93,12 +110,36 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
 
 }); // AGREGADO
 
+$$(document).on('page:init', '.page[data-name="mapa"]', function (e) {
+    // Do something here when page with data-name="about" attribute loaded and initialized
+    // Initialize the platform object:
+      var platform = new H.service.Platform({
+        'apikey': 'Xl9vUwLE6MN47LOIbl3Fl5yVRvWjB3-_z-F0gJWecmA'
+      });
+
+      // Obtain the default map types from the platform object
+      var maptypes = platform.createDefaultLayers();
+
+      // Instantiate (and display) a map object:
+      var map = new H.Map(
+        document.getElementById('mapContainer'),
+        maptypes.vector.normal.map,
+        {
+          zoom: 10,
+          center: { lng: -60.68, lat: -32.95 }
+        });
+
+    
+     
+
+
+}); // AGREGADO
 
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
-    geolocalizacion();
+   // geolocalizacion();
    
     
     
@@ -147,8 +188,9 @@ function crearRegistro(){
     };
 
     function Loguearse(){
-        var correo = $$('#emailLogin').val();
-        var clave = $$('#claveLogin').val();
+      
+        correo = $$('#emailLogin').val();
+        clave = $$('#claveLogin').val();
 
         //Se declara la variable huboError (bandera)
         var huboError = 0;     
@@ -162,13 +204,26 @@ function crearRegistro(){
                 console.log(errorCode);
                 alert(errorMessage);
                 alert(errorCode);
+                app.panel.close('.panel-login', true);
             })
             .then(function(){   
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
-                    mainView.router.navigate("/about/");
+                    
                     app.panel.close('.panel-login', true);
                     mensajeLogin();
+                    $$("#user").text(correo);
+                    usuario = { email: correo, clave: clave };
+                    $$("#tituloindex").text(usuario);
+                    console.log("usuario, te estamos guardando");
+                    //storage.setItem("persona", persona); -> guardará [object Object]
+                    var usuarioAGuardar = JSON.stringify(usuario);
+                    // por eso convertimos el JSON en un string
+                    
+                    
+                    storage.setItem("usuario", usuarioAGuardar);
+                    console.log("usuarioAGuardar: " + usuarioAGuardar);
+                    console.log("usuario: " + usuario.email + "password: " + usuario.clave);
                     
                     
                 }
@@ -259,36 +314,86 @@ function crearRegistro(){
 
     function fnIniciarDatos() {
 
-    codido = "VIS"; tipo = "Visitantes"; saludo = "Hola Visitante";
-    var data = {
-      tipo: tipo, saludo: saludo
-    }
-    refTiposUsuarios.doc(codido).set(data);
+        codido = "VIS"; tipo = "Visitantes"; saludo = "Hola Visitante";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
 
-    codido = "ADM"; tipo = "Administrador"; saludo = "Hola Mr. Admin";
-    var data = {
-      tipo: tipo, saludo: saludo
-    }
-    refTiposUsuarios.doc(codido).set(data);
+        codido = "ADM"; tipo = "Administrador"; saludo = "Hola Mr. Admin";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
 
-    codido = "COM"; tipo = "Comercio"; saludo = "Hola Comercio";
-    var data = {
-      tipo: tipo, saludo: saludo
-    }
-    refTiposUsuarios.doc(codido).set(data);
+        codido = "COM"; tipo = "Comercio"; saludo = "Hola Comercio";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
 
-    var data = {
-      nombre: "Admin",
-      apellido: "Apellido",
-      web: "web.com",
-      telefono: "1234",
-      fnac: "01/01/1999",
-      tipo: "ADM"
-    }
-    refUsuarios.doc("admin@admin.com").set(data);
+        var data = {
+          nombre: "Admin",
+          apellido: "Apellido",
+          web: "web.com",
+          telefono: "1234",
+          fnac: "01/01/1999",
+          tipo: "ADM"
+        }
+        refUsuarios.doc("admin@admin.com").set(data);
+    };
 
+    
 
-}
+    function consultarLocalStorage(){
+        
+        var usuarioGuardado = storage.getItem("usuario");
+        usuarioGuardado = JSON.parse(usuarioGuardado);
+
+        // convertimos el string en JSON
+        if (usuarioGuardado.email == ""){
+          console.log("no hay datos en el local");
+        } else {
+        
+        console.log("consultarlocal, usuarioguardado.email: " + usuarioGuardado.email);
+        console.log("consultarlocal, usuarioguardado.clave: " + usuarioGuardado.clave);
+        usuarioLocal = usuarioGuardado.email;
+        claveLocal = usuarioGuardado.clave;
+        console.log("consultarlocal, usuariolocal + clavelocal: " + usuarioLocal + claveLocal)
+        LoguearseConLocal(usuarioLocal, claveLocal);
+        };
+
+        if ( usuarioGuardado != null){
+          LoguearseConLocal(usuarioLocal, claveLocal);
+        };
+
+    };
+
+    function LoguearseConLocal(u,c ){
+             console.log("loguearseconlocal, u+c"+u+c)
+             
+        //Se declara la variable huboError (bandera)
+        var huboError = 0;     
+        firebase.auth().signInWithEmailAndPassword(u, c)
+            .catch(function(error){
+                //Si hubo algun error, ponemos un valor referenciable en la variable huboError
+                huboError = 1;
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                console.error(errorMessage);
+                console.log(errorCode);
+
+                
+            })
+            .then(function(){   
+                //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
+                if(huboError == 0){
+                  $$("#user").text(u);
+                  console.log("te logueaste");
+                }
+            }); 
+      
+    };
 
 /*
 function fnTocaBoton() {
