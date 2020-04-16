@@ -38,12 +38,12 @@ $$(document).on('deviceready', function() {
     refUsuarios = db.collection("USUARIOS");
     refTiposUsuarios= db.collection("TIPOS_USUARIOS");
 
-    var iniciarDatos = 0;
+    var iniciarDatos = 1;
     if ( iniciarDatos == 1 ) {
         fnIniciarDatos();
     }
 
-    
+
 
     var panel = app.panel.create({
           el: '.panel-registro',
