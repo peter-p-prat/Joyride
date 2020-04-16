@@ -156,10 +156,10 @@ function crearRegistro(){
             .then(function(){   
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
-                    mainView.router.navigate("/index/");
+                    
                     app.panel.close('.panel-login', true);
-                    console.log("te Logueaste");
-                    mensajeLogin();
+                    alert("te Logueaste");
+                    
                 }
             }); 
     };
@@ -170,9 +170,13 @@ function crearRegistro(){
     };
 
     function loginConGoogle(){
+         //Se declara la variable huboError (bandera)
+        var huboError = 0; 
+
         var provider = new firebase.auth.GoogleAuthProvider();
         firebase.auth().signInWithRedirect(provider)
         .then(function(result) {
+        if(huboError == 0){
           // This gives you a Google Access Token. You can use it to access the Google API.
           var token = result.credential.accessToken;
           // The signed-in user info.
@@ -181,8 +185,11 @@ function crearRegistro(){
           mensajesLoginGoogle();
           console.log("te logueaste "+ user);
           alert("te logueaste "+ user);
+        }
         })
         .catch(function(error) {
+            //Si hubo algun error, ponemos un valor referenciable en la variable huboError
+                huboError = 1;
           // Handle Errors here.
           var errorCode = error.code;
           var errorMessage = error.message;
