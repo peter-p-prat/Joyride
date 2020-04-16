@@ -60,7 +60,8 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     });
 
 
-    $$('#enviarRegistro').on('click', crearRegistro());
+    //$$('#enviarRegistro').on('click', crearRegistro());
+    $$('#enviarRegistro').on('click', crearRegistro);
     
 
 
@@ -74,12 +75,18 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
             });
 
 
-    $$('#enviarLogin').on('click', Loguearse());
+    //$$('#enviarLogin').on('click', Loguearse()); // VA SIN LOS ()
+    $$('#enviarLogin').on('click', Loguearse);
 
     
 
    
-    $$("#google").on('click', loginConGoogle());
+    //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
+    $$("#google").on('click', loginConGoogle);
+
+
+}); // AGREGADO
+
 
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
