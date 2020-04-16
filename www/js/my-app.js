@@ -75,13 +75,13 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
             });
 
 
-    //$$('#enviarLogin').on('click', Loguearse());
+    //$$('#enviarLogin').on('click', Loguearse()); // VA SIN LOS ()
     $$('#enviarLogin').on('click', Loguearse);
 
     
 
    
-    //$$("#google").on('click', loginConGoogle());
+    //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
     $$("#google").on('click', loginConGoogle);
 
 
