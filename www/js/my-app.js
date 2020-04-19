@@ -40,13 +40,17 @@ var storage = window.localStorage;
 var usuario = { "email": "", "clave": "" };
 var usuarioLocal, claveLocal;
 var consultaLocal;
+
+//variables para gps
+
+var latUsuario, lonUsuario;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
 
 
 
-
+    geolocalizacion();
 
     consultarLocalStorage();
     
@@ -112,6 +116,7 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
 
 $$(document).on('page:init', '.page[data-name="mapa"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
+    
     // Initialize the platform object:
       var platform = new H.service.Platform({
         'apikey': 'Xl9vUwLE6MN47LOIbl3Fl5yVRvWjB3-_z-F0gJWecmA'
@@ -119,16 +124,55 @@ $$(document).on('page:init', '.page[data-name="mapa"]', function (e) {
 
       // Obtain the default map types from the platform object
       var maptypes = platform.createDefaultLayers();
-
+      //var layers =  platform.createDefaultLayers();
       // Instantiate (and display) a map object:
       var map = new H.Map(
         document.getElementById('mapContainer'),
         maptypes.vector.normal.map,
+        //layers.raster.terrain.transit
         {
-          zoom: 10,
-          center: { lng: -60.68, lat: -32.95 }
+          zoom: 15,
+          center: { lng: lonUsuario, lat: latUsuario }
         });
 
+      if (latUsuario!=0 && lonUsuario!=0) {
+        coordsUsu = {lat: latUsuario, lng: lonUsuario},
+        markerUsu = new H.map.Marker(coordsUsu);
+        map.addObject(markerUsu);
+    }
+
+      // Enable the event system on the map instance:
+      var mapEvents = new H.mapevents.MapEvents(map);
+      // Instantiate the default behavior, providing the mapEvents object:
+      var behavior = new H.mapevents.Behavior(mapEvents);
+
+      // Get an instance of the geocoding service:
+      var service = platform.getSearchService();
+
+      // Call the geocode method with the geocoding parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+      service.geocode({
+        q: '200 S Mathilda Ave, Sunnyvale, CA'
+      }, (result) => {
+        // Add a marker for each location found
+        result.items.forEach((item) => {
+          map.addObject(new H.map.Marker(item.position));
+        });
+      }, alert);
+
+        // Crea interfaz de usuario (zoom, capas y barra de escala)
+      var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
+      
+      /*  PARA SETEAR UBICACION DE COMANDOS
+      var mapSettings = ui.getControl('mapsettings');
+      var zoom = ui.getControl('zoom');
+      var scalebar = ui.getControl('scalebar');
+
+      mapSettings.setAlignment('bottom-right');
+      zoom.setAlignment('bottom-right');
+      scalebar.setAlignment('bottom-right');
+      */
     
      
 
@@ -214,7 +258,7 @@ function crearRegistro(){
                     mensajeLogin();
                     $$("#user").text(correo);
                     usuario = { email: correo, clave: clave };
-                    $$("#tituloindex").text(usuario);
+                    
                     console.log("usuario, te estamos guardando");
                     //storage.setItem("persona", persona); -> guardará [object Object]
                     var usuarioAGuardar = JSON.stringify(usuario);
@@ -279,9 +323,12 @@ function crearRegistro(){
         // This method accepts a Position object, which contains the
         // current GPS coordinates
         //
-
+        
         var onSuccess = function(position) {
-            alert('Latitude: '          + position.coords.latitude          + '\n' +
+          latUsuario = position.coords.latitude;
+          lonUsuario = position.coords.longitude;
+          console.log(latUsuario + lonUsuario);
+            /*alert('Latitude: '          + position.coords.latitude          + '\n' +
                   'Longitude: '         + position.coords.longitude         + '\n' +
                   'Altitude: '          + position.coords.altitude          + '\n' +
                   'Accuracy: '          + position.coords.accuracy          + '\n' +
@@ -297,6 +344,7 @@ function crearRegistro(){
                       'Heading: '           + position.coords.heading           + '\n' +
                       'Speed: '             + position.coords.speed             + '\n' +
                       'Timestamp: '         + position.timestamp                + '\n');
+                      */
         };
      
         // onError Callback receives a PositionError object
@@ -360,12 +408,12 @@ function crearRegistro(){
         usuarioLocal = usuarioGuardado.email;
         claveLocal = usuarioGuardado.clave;
         console.log("consultarlocal, usuariolocal + clavelocal: " + usuarioLocal + claveLocal)
-        LoguearseConLocal(usuarioLocal, claveLocal);
-        };
+        
 
         if ( usuarioGuardado != null){
           LoguearseConLocal(usuarioLocal, claveLocal);
         };
+      };
 
     };
 
@@ -394,6 +442,9 @@ function crearRegistro(){
             }); 
       
     };
+
+
+
 
 /*
 function fnTocaBoton() {
