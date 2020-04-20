@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline'; font-src * data: URIs ">
+     -->
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
+    type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
+    type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"
+    type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
+    type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
+       type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css"
+    href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Color theme for statusbar -->
+    <meta name="theme-color" content="#2196f3">
+    <!-- Your app title -->
+    <title>My App</title>
+    <!-- Path to Framework7 Library CSS -->
+    <link rel="stylesheet" href="lib/framework7/css/framework7.bundle.min.css">
+    <!-- Path to icons -->
+    <link rel="stylesheet" href="css/icons.css">
+    <!-- Path to your custom app styles-->
+    <link rel="stylesheet" href="css/app.css">
+
+
+</head>
+
+<body>
+    <div id="app">
+        <!-- Statusbar overlay -->
+        <div class="statusbar"></div>
+    
+        <!-- Your main view, should have "view-main" class -->
+        <div class="view view-main">
+            <!-- Initial Page, "data-name" contains page name -->
+            <div data-name="index" class="page">
+    
+
+
+
+
+                <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-header">
+
+
+                <!-- Top Navbar -->
+                <div class="navbar">
+                    <div class="navbar-bg"></div>
+                    <div class="navbar-inner">
+                        <a id="user" data-panel=".panel-login" class="panel-open">LOGIN Y REGISTRO</a>
+                        <div class="title">Page Title</div>
+                        
+                    </div>
+                </div>
+
+                <!-- PANEL -->
+                <div id="panelLogin" class="panel panel-left panel-cover panel-login">
+                  <div class="block">
+                    <h4>Inicia sesión</h4>
+                            <form class="list" id="formularioLogin">
+                                  <ul>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">E-mail</div>
+                                        <div class="item-input-wrap">
+                                          <input type="email" id="emailLogin" placeholder="Ingrese su E-mail">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">Constraseña</div>
+                                        <div class="item-input-wrap">
+                                          <input type="password" id="claveLogin" placeholder="Ingrese su contraseña">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                
+                                  </ul>
+                                </form>
+                                <div id="botones" class="block  text-align-center">
+                                  <a id="enviarLogin" class="boton button button-round button-fill">Iniciar sesión</a>
+                                </div>
+                                <div id="botones" class="text-align-center">
+                                  ¿Aún no sos usuario? <a href="#" data-panel=".panel-registro" class="panel-open">Registrate</a>
+                                </div>
+                                <div id="google" class="text-align-center">
+                                  <div class="button">inicia sesion con google</div>
+                                </div>
+                    <!-- Clicking on link with "panel-close" class will close panel -->
+                    <p><a href="#" class="panel-close">Close me</a></p>
+                  </div>
+                </div>
+
+
+
+                <div class="panel panel-left panel-cover panel-registro">
+                  <div class="block">
+                    <h4>Registrate</h4>
+                    <p> Ingresá una dirección de e-mail valida en la que puedas recibir un correo de validación</p>
+                    <form class="list" id="formularioRegistro">
+                                  <ul>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">E-mail</div>
+                                        <div class="item-input-wrap">
+                                          <input type="email" id="emailRegistro" placeholder="Ingrese su E-mail">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">Constraseña</div>
+                                        <div class="item-input-wrap">
+                                          <input type="password" id="claveRegistro" placeholder="Ingrese su contraseña">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                
+                                  </ul>
+                                </form>
+                                <div id="botones" class="block  text-align-center">
+                                  <a id="enviarRegistro" class="boton button button-round button-fill">Registrame</a>
+                                </div>
+                    
+                    <!-- Click on link with "panel-open" and data-panel=".panel-right" attribute will open Right panel -->
+                    <p>¿Ya estas registrado? <a href="#" data-panel=".panel-login" class="panel-open">Inicia sesion</a></p>
+                    <!-- Clicking on link with "panel-close" class will close panel -->
+                    <p><a href="#" class="panel-close">Cerrar</a></p>
+                  </div>
+                </div>
+
+                <!-- Toolbar 
+                <div class="toolbar toolbar-bottom">
+                    <div class="toolbar-inner">
+                    
+                    <a href="#" class="link">Link 1</a>
+                    <a href="#" class="link">Link 2</a>
+                    </div>
+                </div>
+        -->
+                <!-- Scrollable page content -->
+                <div class="page-content text-align-center">
+                  
+                    
+                    <div class="block">
+                    <h3 >Contenido del Index</h3>
+                    <p id="tituloindex">hola</p>
+
+
+
+
+                    <!-- Link to another page -->
+                    <a href="/about/" class="button button-round button-fill">Página About</a>
+                    <a href="/mapa/" class="button button-round button-fill">mapa</a>
+
+
+                  <!--
+                    // Inicio de sesion y registro EN POPUP Y POPOVER 
+                      <p><a href="#" data-popover=".popover-login" class="popover-open">Inicia sesión</a></p>
+                      <p><a href="#" data-popup=".popup-registro" class="popup-open">Registrarse</a></p>
+
+
+                     // EL POPUPOVER de login 
+                        // And somewhere in DOM 
+                        <div class="popover popover-login">
+                          <div class="popover-inner block">
+                            //Link to close popover 
+                            <h4>Inicia sesión</h4>
+                            <form class="list" id="formularioLogin">
+                                  <ul>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">E-mail</div>
+                                        <div class="item-input-wrap">
+                                          <input type="email" id="emailLogin" placeholder="Ingrese su E-mail">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">Constraseña</div>
+                                        <div class="item-input-wrap">
+                                          <input type="password" id="claveLogin" placeholder="Ingrese su contraseña">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                
+                                  </ul>
+                                </form>
+                                <div id="botones" class="block  text-align-center">
+                                  <a id="enviarLogin" class="boton button button-round button-fill">Iniciar sesión</a>
+                                </div>
+                                <div id="botones" class="text-align-center">
+                                  ¿Aún no sos usuario? <a href="#" data-popup=".popup-registro" class="boton popup-open popover-close">Registrate</a>
+                                </div>
+                                <div id="botones" class="text-align-center">
+                                    <a class="link popover-close">Cerrar</a>
+                                </div>
+                          </div>
+                        </div>
+                      // POPUP REGISTRO 
+                    <div class="popup popup-registro">
+                        <div class="view">
+                          <div class="page">
+                            <div class="navbar">
+                              <div class="navbar-bg"></div>
+                              <div class="navbar-inner">
+                                <div class="title">Registrate</div>
+                                <div class="right">
+                                  // Link to close popup 
+                                  <a  class="link popup-close">Cerrar</a>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="page-content">
+                              <form class="list" id="formularioRegistro">
+                                  <ul>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">E-mail</div>
+                                        <div class="item-input-wrap">
+                                          <input type="email" id="emailRegistro" placeholder="Ingrese su E-mail">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                    <li class="item-content item-input">
+                                      <div class="item-inner">
+                                        <div class="item-title item-label">Constraseña</div>
+                                        <div class="item-input-wrap">
+                                          <input type="password" id="claveRegistro" placeholder="Ingrese su contraseña">
+                                          <span class="input-clear-button"></span>
+                                        </div>
+                                      </div>
+                                    </li>
+                                
+                                  </ul>
+                                </form>
+                                <div id="botones" class="block  text-align-center">
+                                  <a id="enviarRegistro" class="boton button button-round button-fill">Registrame</a>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                  -->
+
+
+
+
+                    <!-- GRUPO DE BOTONES CON EVENTOS 
+                        <div class="block">
+                          <div class="row">
+                            <button id="btn_g1_1" class="col button button-outline tocaBoton">Botón 1</button>
+                            <button id="btn_g1_2" class="col button button-outline tocaBoton">Botón 2</button>
+                            <button id="btn_g1_3" class="col button button-outline tocaBoton">Botón 3</button>
+                          </div>
+                          <h3 id="msgBtn">Tocá un botón y te digo algo</h3>
+                        </div>
+                     -->
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="lib/framework7/js/framework7.bundle.min.js"></script>
+    <script type="text/javascript" src="js/my-app.js"></script>
+
+    
+
+
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+    
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyDk3YROcG-7Ufxh9EDf_tEjEqzJeTNQysI",
+        authDomain: "wakemapp.firebaseapp.com",
+        databaseURL: "https://wakemapp.firebaseio.com",
+        projectId: "wakemapp",
+        storageBucket: "wakemapp.appspot.com",
+        messagingSenderId: "390958939262",
+        appId: "1:390958939262:web:340aaa4fd1ba5ff6492c2f"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+</body>
+
+</html>

@@ -108,6 +108,62 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
 
+    // Initialize the platform object:
+      var platform = new H.service.Platform({
+        'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
+      });
+
+      // Obtain the default map types from the platform object
+      var maptypes = platform.createDefaultLayers();
+      //var layers =  platform.createDefaultLayers();
+      // Instantiate (and display) a map object:
+      var map = new H.Map(
+        document.getElementById('mapContainer1'),
+        maptypes.vector.normal.map,
+        //layers.raster.terrain.transit
+        {
+          zoom: 15,
+          center: { lng: lonUsuario, lat: latUsuario }
+        });
+
+      if (latUsuario!=0 && lonUsuario!=0) {
+        coordsUsu = {lat: latUsuario, lng: lonUsuario},
+        markerUsu = new H.map.Marker(coordsUsu);
+        map.addObject(markerUsu);
+    }
+
+      // Enable the event system on the map instance:
+      var mapEvents = new H.mapevents.MapEvents(map);
+      // Instantiate the default behavior, providing the mapEvents object:
+      var behavior = new H.mapevents.Behavior(mapEvents);
+
+      // Get an instance of the geocoding service:
+      var service = platform.getSearchService();
+
+      // Call the geocode method with the geocoding parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+      service.geocode({
+        q: '200 S Mathilda Ave, Sunnyvale, CA'
+      }, (result) => {
+        // Add a marker for each location found
+        result.items.forEach((item) => {
+          map.addObject(new H.map.Marker(item.position));
+        });
+      }, alert);
+
+        // Crea interfaz de usuario (zoom, capas y barra de escala)
+      var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
+      
+      /*  PARA SETEAR UBICACION DE COMANDOS
+      var mapSettings = ui.getControl('mapsettings');
+      var zoom = ui.getControl('zoom');
+      var scalebar = ui.getControl('scalebar');
+
+      mapSettings.setAlignment('bottom-right');
+      zoom.setAlignment('bottom-right');
+      scalebar.setAlignment('bottom-right');
+      */
     
      
 
@@ -327,7 +383,8 @@ function crearRegistro(){
         var onSuccess = function(position) {
           latUsuario = position.coords.latitude;
           lonUsuario = position.coords.longitude;
-          console.log(latUsuario + lonUsuario);
+          console.log(latUsuario);
+          console.log(lonUsuario);
             /*alert('Latitude: '          + position.coords.latitude          + '\n' +
                   'Longitude: '         + position.coords.longitude         + '\n' +
                   'Altitude: '          + position.coords.altitude          + '\n' +
