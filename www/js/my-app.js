@@ -27,6 +27,7 @@ var app = new Framework7({
         path: '/mapa/',
         url: 'mapa prueba.html',
       },
+      
     ]
     // ... other parameters
   });
@@ -44,11 +45,17 @@ var consultaLocal;
 //variables para gps
 
 var latUsuario, lonUsuario;
+
+//variables para busqueda en gps
+var queryBusqueda = " ";
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
 
-
+    $$("#busqueda").keyup(function(){
+      guardarQuery();
+      console.log("tomó el key up");
+    })
 
     geolocalizacion();
 
@@ -108,62 +115,6 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
 
-    // Initialize the platform object:
-      var platform = new H.service.Platform({
-        'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
-      });
-
-      // Obtain the default map types from the platform object
-      var maptypes = platform.createDefaultLayers();
-      //var layers =  platform.createDefaultLayers();
-      // Instantiate (and display) a map object:
-      var map = new H.Map(
-        document.getElementById('mapContainer1'),
-        maptypes.vector.normal.map,
-        //layers.raster.terrain.transit
-        {
-          zoom: 15,
-          center: { lng: lonUsuario, lat: latUsuario }
-        });
-
-      if (latUsuario!=0 && lonUsuario!=0) {
-        coordsUsu = {lat: latUsuario, lng: lonUsuario},
-        markerUsu = new H.map.Marker(coordsUsu);
-        map.addObject(markerUsu);
-    }
-
-      // Enable the event system on the map instance:
-      var mapEvents = new H.mapevents.MapEvents(map);
-      // Instantiate the default behavior, providing the mapEvents object:
-      var behavior = new H.mapevents.Behavior(mapEvents);
-
-      // Get an instance of the geocoding service:
-      var service = platform.getSearchService();
-
-      // Call the geocode method with the geocoding parameters,
-      // the callback and an error callback function (called if a
-      // communication error occurs):
-      service.geocode({
-        q: '200 S Mathilda Ave, Sunnyvale, CA'
-      }, (result) => {
-        // Add a marker for each location found
-        result.items.forEach((item) => {
-          map.addObject(new H.map.Marker(item.position));
-        });
-      }, alert);
-
-        // Crea interfaz de usuario (zoom, capas y barra de escala)
-      var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
-      
-      /*  PARA SETEAR UBICACION DE COMANDOS
-      var mapSettings = ui.getControl('mapsettings');
-      var zoom = ui.getControl('zoom');
-      var scalebar = ui.getControl('scalebar');
-
-      mapSettings.setAlignment('bottom-right');
-      zoom.setAlignment('bottom-right');
-      scalebar.setAlignment('bottom-right');
-      */
     
      
 
@@ -313,6 +264,8 @@ function crearRegistro(){
                     app.panel.close('.panel-login', true);
                     mensajeLogin();
                     $$("#user").text(correo);
+                    $$("nombreUsuario").text(correo);
+                    $$("user").attr("data-panel",".panel-user");
                     usuario = { email: correo, clave: clave };
                     
                     console.log("usuario, te estamos guardando");
@@ -372,7 +325,11 @@ function crearRegistro(){
           console.log("te logueaste "+ user);
           alert("te logueaste "+ user);
     };
-
+    function guardarQuery(){
+        queryBusqueda=$$("#busqueda").val();
+        console.log(queryBusqueda);
+        geolocalizacion();
+    };
     function geolocalizacion(){
 
         // onSuccess Callback
@@ -385,6 +342,85 @@ function crearRegistro(){
           lonUsuario = position.coords.longitude;
           console.log(latUsuario);
           console.log(lonUsuario);
+
+          // Initialize the platform object:
+      var platform = new H.service.Platform({
+        'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
+      });
+
+      // Obtain the default map types from the platform object
+      var maptypes = platform.createDefaultLayers();
+      //var layers =  platform.createDefaultLayers();
+      // Instantiate (and display) a map object:
+      var map = new H.Map(
+        document.getElementById('mapContainer1'),
+        maptypes.vector.normal.map,
+        //layers.raster.terrain.transit
+        {
+          zoom: 15,
+          center: { lng: lonUsuario, lat: latUsuario }
+        });
+
+      if (latUsuario!=0 && lonUsuario!=0) {
+        coordsUsu = {lat: latUsuario, lng: lonUsuario},
+        markerUsu = new H.map.Marker(coordsUsu);
+        map.addObject(markerUsu);
+        map.setCenter(coordsUsu); // centrar el mapa en una coordenada
+    }
+
+      // Enable the event system on the map instance:
+      var mapEvents = new H.mapevents.MapEvents(map);
+      // Instantiate the default behavior, providing the mapEvents object:
+      var behavior = new H.mapevents.Behavior(mapEvents);
+
+      // Get an instance of the geocoding service:
+      var service = platform.getSearchService();
+
+      // Call the geocode method with the geocoding parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+
+    
+        
+      
+
+      service.geocode({
+        q: queryBusqueda
+      }, (result) => {
+
+        // Add a marker for each location found
+        result.items.forEach((item) => {
+          map.addObject(new H.map.Marker(item.position));
+          console.log("lat: "+item.position.lat);
+          console.log("lng: "+item.position.lng);
+          
+          crearPopoverResultados();
+
+
+          /*resultado=JSON.stringify(item)
+          console.log("item: "+resultado);
+          console.log(item.address.street+", " +item.address.houseNumber+", " 
+            +item.address.city+", " +item.address.state+", " +item.address.countryName);
+          */
+
+
+        });
+      }, alert);
+      
+      
+
+        // Crea interfaz de usuario (zoom, capas y barra de escala)
+      var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
+      
+      /*  PARA SETEAR UBICACION DE COMANDOS
+      var mapSettings = ui.getControl('mapsettings');
+      var zoom = ui.getControl('zoom');
+      var scalebar = ui.getControl('scalebar');
+
+      mapSettings.setAlignment('bottom-right');
+      zoom.setAlignment('bottom-right');
+      scalebar.setAlignment('bottom-right');
+      */
             /*alert('Latitude: '          + position.coords.latitude          + '\n' +
                   'Longitude: '         + position.coords.longitude         + '\n' +
                   'Altitude: '          + position.coords.altitude          + '\n' +
@@ -415,6 +451,65 @@ function crearRegistro(){
 
 
     };
+      function crearPopoverResultados(){
+
+
+        var dynamicPopover = app.popover.create({
+          targetEl: '#busqueda',
+          content: '<div class="popover">'+
+                      '<div class="popover-inner">'+
+                        '<div class="list">'+
+                          '<ul>'+
+                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
+                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
+                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
+                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
+                          '</ul>'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>',
+
+
+          // Events
+          on: {
+            open: function (popover) {
+              console.log('Popover open');
+            },
+            opened: function (popover) {
+              console.log('Popover opened');
+            },
+          }
+        });
+        
+        dynamicPopover.open();
+      };
+
+
+   
+
+    /*
+    url = 'https://geocoder.ls.hereapi.com/6.2/geocode.json';
+      app.request.json(url, {
+          searchtext: queryBusqueda,
+          apiKey: 'kyLgrWlL89_29OBHanpZbd2Jb49Xy46GgIKSioggFEU',
+          gen: '9'
+        }, function (data) {
+           // hacer algo con data
+           console.log("geo:" + data);
+
+
+          // POSICION GEOCODIFICADA de la direccion
+          latitud = data.Response.View[0].Result[0].Location.DisplayPosition.Latitude;
+          longitud = data.Response.View[0].Result[0].Location.DisplayPosition.Longitude;
+          //alert(latitud + " / " + longitud);
+              coordsG = {lat: latitud, lng: longitud},
+              markerG = new H.map.Marker(coordsG);
+              map.addObject(markerG);
+              
+          //     alert(JSON.stringify(data));
+          }, function(xhr, status) { console.log("error geo: "+status); }   );
+    */  
+
 
 
     function fnIniciarDatos() {
@@ -495,6 +590,11 @@ function crearRegistro(){
                 if(huboError == 0){
                   $$("#user").text(u);
                   console.log("te logueaste");
+                  
+                  $$("#nombreUsuario").text(u);
+                    $$("#user").attr("data-panel",".panel-user");
+
+
                 }
             }); 
       

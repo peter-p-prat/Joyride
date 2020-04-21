@@ -151,6 +151,14 @@
                 </div>
 
 
+                <div id="panelUser" class="panel panel-left panel-cover panel-user">
+                  <div class="block">
+                    <h4 id="nombreUsuario"></h4>
+                            
+                  </div>
+                </div>
+
+
                 <div class="page-content display-flex flex-direction-column align-items-center">
 
                   <div class="list inset contenedorBuscador">
@@ -158,14 +166,14 @@
                       <li class="item-content item-input">
                         <div class="item-inner">
                           <div class="item-input-wrap">
-                            <input type="text" placeholder="Tu búsqueda">
+                            <input id="busqueda" class="dynamic-popover" type="text" placeholder="Tu búsqueda" value="">
                             <span class="input-clear-button"></span>
                           </div>
                         </div>
                       </li>
                     </ul>
                   </div>
-                  
+                  <div class="popover-resultados"></div>
 
                   <div class="contenedormapa block block-strong text-align-center">
                     <div style="width: 100vw; height: 80vh" id="mapContainer1"></div>
