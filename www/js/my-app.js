@@ -47,6 +47,7 @@ var consultaLocal;
 var latUsuario, lonUsuario;
 
 //variables para mapas
+var platform;
 var map;
 var queryBusqueda = " ";
 // Handle Cordova Device Ready Event
@@ -329,7 +330,37 @@ function crearRegistro(){
     function guardarQuery(){
         queryBusqueda=$$("#busqueda").val();
         console.log(queryBusqueda);
-        geolocalizacion();
+        // Get an instance of the geocoding service:
+      var service = platform.getSearchService();
+
+      // Call the geocode method with the geocoding parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+        
+      
+
+      service.geocode({
+        q: queryBusqueda
+      }, (result) => {
+
+        // Add a marker for each location found
+        result.items.forEach((item) => {
+          map.addObject(new H.map.Marker(item.position));
+          console.log("lat: "+item.position.lat);
+          console.log("lng: "+item.position.lng);
+          console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
+          // crearPopoverResultados();
+
+
+          /*resultado=JSON.stringify(item)
+          console.log("item: "+resultado);
+          console.log(item.address.street+", " +item.address.houseNumber+", " 
+            +item.address.city+", " +item.address.state+", " +item.address.countryName);
+          */
+
+
+        });
+      }, alert);
     };
     function geolocalizacion(){
 
@@ -345,7 +376,7 @@ function crearRegistro(){
           console.log(lonUsuario);
 
           // Initialize the platform object:
-      var platform = new H.service.Platform({
+      platform = new H.service.Platform({
         'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
       });
 
@@ -385,28 +416,6 @@ function crearRegistro(){
         
       
 
-      service.geocode({
-        q: queryBusqueda
-      }, (result) => {
-
-        // Add a marker for each location found
-        result.items.forEach((item) => {
-          map.addObject(new H.map.Marker(item.position));
-          console.log("lat: "+item.position.lat);
-          console.log("lng: "+item.position.lng);
-          console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
-          // crearPopoverResultados();
-
-
-          /*resultado=JSON.stringify(item)
-          console.log("item: "+resultado);
-          console.log(item.address.street+", " +item.address.houseNumber+", " 
-            +item.address.city+", " +item.address.state+", " +item.address.countryName);
-          */
-
-
-        });
-      }, alert);
       
       
 
