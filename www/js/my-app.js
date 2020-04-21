@@ -46,15 +46,16 @@ var consultaLocal;
 
 var latUsuario, lonUsuario;
 
-//variables para busqueda en gps
+//variables para mapas
+var map;
 var queryBusqueda = " ";
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
-
-    $$("#busqueda").keyup(function(){
+    //para que funcione hay que darle al ENTER del teclado!
+    $$("#busqueda").change(function(){
       guardarQuery();
-      console.log("tomó el key up");
+      console.log("tomó el change");
     })
 
     geolocalizacion();
@@ -352,7 +353,7 @@ function crearRegistro(){
       var maptypes = platform.createDefaultLayers();
       //var layers =  platform.createDefaultLayers();
       // Instantiate (and display) a map object:
-      var map = new H.Map(
+      map = new H.Map(
         document.getElementById('mapContainer1'),
         maptypes.vector.normal.map,
         //layers.raster.terrain.transit
@@ -393,8 +394,8 @@ function crearRegistro(){
           map.addObject(new H.map.Marker(item.position));
           console.log("lat: "+item.position.lat);
           console.log("lng: "+item.position.lng);
-          
-          crearPopoverResultados();
+          console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
+          // crearPopoverResultados();
 
 
           /*resultado=JSON.stringify(item)
@@ -416,7 +417,6 @@ function crearRegistro(){
       var mapSettings = ui.getControl('mapsettings');
       var zoom = ui.getControl('zoom');
       var scalebar = ui.getControl('scalebar');
-
       mapSettings.setAlignment('bottom-right');
       zoom.setAlignment('bottom-right');
       scalebar.setAlignment('bottom-right');
@@ -451,6 +451,9 @@ function crearRegistro(){
 
 
     };
+
+
+
       function crearPopoverResultados(){
 
 
