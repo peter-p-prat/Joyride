@@ -47,6 +47,7 @@ var consultaLocal;
 var latUsuario, lonUsuario;
 
 //variables para mapas
+var query="  ";
 var service;
 var platform;
 var map;
@@ -347,7 +348,12 @@ function crearRegistro(){
       }, (result) => {
         crearPopoverResultados();
         var indice=0;
-        group = new H.map.Group();
+
+        var group = new H.map.Group();
+        map.addObject(group);
+        // get geo bounding box for the group and set it to the map
+        
+
         // Add a marker for each location found
         result.items.forEach((item) => {
           map.addObject(new H.map.Marker(item.position));
@@ -357,7 +363,8 @@ function crearRegistro(){
           console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
           console.log(item.title)
           // crearPopoverResultados();
-
+          indice++;
+          
           /*
           //creo una variable de acumulacion para poder identificar los resultados a la hora de crear el grupo de marcadores
           indice++;
@@ -368,28 +375,39 @@ function crearRegistro(){
           eval("var marcador"+indice+" = new H.map.Marker(item.position)")
           ,*/
           
-          $$("#resultados").append('<li><a class="list-button item-link" id='+item.title+' onclick="definirResultado('+this.id+')" href="#">'+item.title +'</a></li>');
+          $$("#resultados").append('<li><a class="list-button item-link" id="Córdoba 800, 3600 Formosa, Argentina" onclick="definirResultado("'+this.id+'")" href="#">'+item.title +'</a></li>');
+          
           /*resultado=JSON.stringify(item)
           console.log("item: "+resultado);
           console.log(item.address.street+", " +item.address.houseNumber+", " 
             +item.address.city+", " +item.address.state+", " +item.address.countryName);
           */
 
+          //CUANDO AGREGO LA FUNCION ADDMARKERTOGROUP DEJA DE FUNCIONAR BIEN LA FUNCION, ME MUESTRA UN SOLO RESULTADO
+          //addMarkerToGroup(group, {lat: item.position.lat , lng: item.position.lng});
 
         });
+        /*
         for ( i = 1; i <= indice; i++) {
-        group.addObjects(["marcador"+i]);
+        group.addObject(["marcador"+i]);
          map.addObject(group);
          // get geo bounding box for the group and set it to the map
         map.getViewModel().setLookAtData({
           bounds: group.getBoundingBox()
         });
         };
+        */
+        console.log(indice);
       }, alert);
+    };
+     function addMarkerToGroup(group, coordinatel) {
+      var marker = new H.map.Marker(coordinate);
+      group.addObject(marker);     
     };
 
     function definirResultado(a){
-      service = platform.getSearchService();
+       service = platform.getSearchService();
+      query=a;
       
       // Call the geocode method with the geocoding parameters,
       // the callback and an error callback function (called if a
@@ -398,7 +416,7 @@ function crearRegistro(){
       
 
       service.geocode({
-        q: 'Córdoba 800, 3600 Formosa, Argentina'
+        q: query
       }, (result) => {
         console.log("tomó el query");
         // Add a marker for each location found
