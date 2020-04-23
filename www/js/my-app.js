@@ -375,7 +375,7 @@ function crearRegistro(){
           eval("var marcador"+indice+" = new H.map.Marker(item.position)")
           ,*/
           
-          $$("#resultados").append('<li><a class="list-button item-link" id="Córdoba 800, 3600 Formosa, Argentina" onclick="definirResultado("'+this.id+'")" href="#">'+item.title +'</a></li>');
+          $$("#resultados").append('<li><a class="list-button item-link" id="'+item.title+'" onclick="definirResultado("'+this.id+'")" href="#">'+item.title +'</a></li>');
           
           /*resultado=JSON.stringify(item)
           console.log("item: "+resultado);
