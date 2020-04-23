@@ -1,5 +1,10 @@
 /* Your app custom styles here */
-
+.popoverResultados{
+	width: 90vw;
+}
+.popover-inner {
+	max-height: 80vh;
+}
 .contenedorBuscador{
 	width: 95vw;
 	

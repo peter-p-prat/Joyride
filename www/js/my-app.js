@@ -47,9 +47,11 @@ var consultaLocal;
 var latUsuario, lonUsuario;
 
 //variables para mapas
+var service;
 var platform;
 var map;
 var queryBusqueda = " ";
+var indice = 0;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
@@ -62,6 +64,7 @@ $$(document).on('deviceready', function() {
     geolocalizacion();
 
     consultarLocalStorage();
+    setUpClickListener(map);
     
 
     db = firebase.firestore();
@@ -116,7 +119,7 @@ $$(document).on('page:init', function (e) {
 $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
-
+    setUpClickListener(map);
     
      
 
@@ -331,7 +334,7 @@ function crearRegistro(){
         queryBusqueda=$$("#busqueda").val();
         console.log(queryBusqueda);
         // Get an instance of the geocoding service:
-      var service = platform.getSearchService();
+      service = platform.getSearchService();
 
       // Call the geocode method with the geocoding parameters,
       // the callback and an error callback function (called if a
@@ -342,16 +345,74 @@ function crearRegistro(){
       service.geocode({
         q: queryBusqueda
       }, (result) => {
+        crearPopoverResultados();
+        var indice=0;
+        group = new H.map.Group();
+        // Add a marker for each location found
+        result.items.forEach((item) => {
+          map.addObject(new H.map.Marker(item.position));
+          
+          console.log("lat: "+item.position.lat);
+          console.log("lng: "+item.position.lng);
+          console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
+          console.log(item.title)
+          // crearPopoverResultados();
 
+          /*
+          //creo una variable de acumulacion para poder identificar los resultados a la hora de crear el grupo de marcadores
+          indice++;
+          eval(" resultado ="+indice);
+          console.log(resultado);
+          */
+          /* CON ESTO INTENTO CONCATENAR LA VARIABLE INDICE PARA NOMBRAR LOS MARCADORES
+          eval("var marcador"+indice+" = new H.map.Marker(item.position)")
+          ,*/
+          
+          $$("#resultados").append('<li><a class="list-button item-link" id='+item.title+' onclick="definirResultado('+this.id+')" href="#">'+item.title +'</a></li>');
+          /*resultado=JSON.stringify(item)
+          console.log("item: "+resultado);
+          console.log(item.address.street+", " +item.address.houseNumber+", " 
+            +item.address.city+", " +item.address.state+", " +item.address.countryName);
+          */
+
+
+        });
+        for ( i = 1; i <= indice; i++) {
+        group.addObjects(["marcador"+i]);
+         map.addObject(group);
+         // get geo bounding box for the group and set it to the map
+        map.getViewModel().setLookAtData({
+          bounds: group.getBoundingBox()
+        });
+        };
+      }, alert);
+    };
+
+    function definirResultado(a){
+      service = platform.getSearchService();
+      
+      // Call the geocode method with the geocoding parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+        console.log("entró a la funcion de definicion de resultado");
+      
+
+      service.geocode({
+        q: 'Córdoba 800, 3600 Formosa, Argentina'
+      }, (result) => {
+        console.log("tomó el query");
         // Add a marker for each location found
         result.items.forEach((item) => {
           map.addObject(new H.map.Marker(item.position));
           console.log("lat: "+item.position.lat);
           console.log("lng: "+item.position.lng);
           console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
-          // crearPopoverResultados();
-
-
+          
+          latBusqueda = item.position.lat;
+          lngBusqueda = item.position.lng;
+          coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
+          map.setCenter(coordsBusqueda);
+          
           /*resultado=JSON.stringify(item)
           console.log("item: "+resultado);
           console.log(item.address.street+", " +item.address.houseNumber+", " 
@@ -361,7 +422,7 @@ function crearRegistro(){
 
         });
       }, alert);
-    };
+    }
     function geolocalizacion(){
 
         // onSuccess Callback
@@ -412,7 +473,7 @@ function crearRegistro(){
       // the callback and an error callback function (called if a
       // communication error occurs):
 
-    
+     
         
       
 
@@ -458,24 +519,41 @@ function crearRegistro(){
      
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
 
-
+        
     };
+    function setUpClickListener(map) {
+      //esta funcion deberia detectar un click en la pantalla y llamar a la funcion addMarker
+        map.addEventListener('tap', function (evt) {
+          var coord = map.screenToGeo(evt.currentPointer.viewportX,
+                  evt.currentPointer.viewportY);
+           addMarker(coord);
+        });
+      };
+      function addMarker(coordinates){
+        //esta funcion deberia agregar un marcador y una burbuja en las coordenadas que le pasa la funcion setUpClickListener
+          var marker = new H.map.Marker({lat:coordinates.lat, lng: coordinates.lng});
+          map.addObject(marker);
 
-
+          var bubble =  new H.ui.InfoBubble({lat:coordinates.lat, lng: coordinates.lng}, {
+                  content: '<b>Hello World!</b>'
+                 });
+          // show info bubble
+          ui.addBubble(bubble);
+      };
+      
+     
 
       function crearPopoverResultados(){
 
 
         var dynamicPopover = app.popover.create({
           targetEl: '#busqueda',
-          content: '<div class="popover">'+
+
+          content: '<div class="popover popoverResultados">'+
                       '<div class="popover-inner">'+
                         '<div class="list">'+
-                          '<ul>'+
-                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
-                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
-                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
-                            '<li><a class="list-button item-link" href="#">Link 1</a></li>'+
+                          '<ul id="resultados">'+
+                            
                           '</ul>'+
                         '</div>'+
                       '</div>'+
