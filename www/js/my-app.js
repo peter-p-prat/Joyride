@@ -53,13 +53,26 @@ var platform;
 var map;
 var queryBusqueda = " ";
 var indice = 0;
+var container;
+var marcador1;
+var marcador2;
+var marcador3;
+var marcador4;
+var marcador5;
+var marcador6;
+var marcador7;
+var marcador8;
+var marcador9;
+var l=0;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
     //para que funcione hay que darle al ENTER del teclado!
     $$("#busqueda").change(function(){
-      guardarQuery();
-      console.log("tomó el change");
+      if ($$("#busqueda").val()!=""){
+        guardarQuery();
+        console.log("tomó el change");
+      };
     })
 
     geolocalizacion();
@@ -105,7 +118,8 @@ $$(document).on('deviceready', function() {
    
     //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
     $$("#google").on('click', loginConGoogle);
-    
+
+    $$(".contenedormapa").on("click", setUpClickListener(map));
 
 });
 
@@ -340,31 +354,31 @@ function crearRegistro(){
       // Call the geocode method with the geocoding parameters,
       // the callback and an error callback function (called if a
       // communication error occurs):
-        
+      if (l==1){
+        container.removeAll();
+      };
       
 
       service.geocode({
         q: queryBusqueda
       }, (result) => {
         crearPopoverResultados();
-        var indice=0;
-
-        var group = new H.map.Group();
-        map.addObject(group);
+        indice=1;
+        //var group = new H.map.Group();
+        //map.addObject(group);
         // get geo bounding box for the group and set it to the map
         
-
         // Add a marker for each location found
         result.items.forEach((item) => {
-          map.addObject(new H.map.Marker(item.position));
-          
+         // map.addObject(new H.map.Marker(item.position));
+          eval("marcador"+indice+" = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+         // var brandenburgerTorMarker = new H.map.Marker(new H.geo.Point(52.516237, 13.377686));
           console.log("lat: "+item.position.lat);
           console.log("lng: "+item.position.lng);
           console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
           console.log(item.title)
           // crearPopoverResultados();
           indice++;
-          
           /*
           //creo una variable de acumulacion para poder identificar los resultados a la hora de crear el grupo de marcadores
           indice++;
@@ -374,9 +388,16 @@ function crearRegistro(){
           /* CON ESTO INTENTO CONCATENAR LA VARIABLE INDICE PARA NOMBRAR LOS MARCADORES
           eval("var marcador"+indice+" = new H.map.Marker(item.position)")
           ,*/
-          
-          $$("#resultados").append('<li><a class="list-button item-link" id="'+item.title+'" onclick="definirResultado("'+this.id+'")" href="#">'+item.title +'</a></li>');
-          
+          var m=0;
+          $$("#resultados").append('<li><a class="list-button item-link tituloItem" id="'+item.title+'" href="#">'+item.title +'</a></li>');
+          $$(".tituloItem").on('click',function(){
+              if (m==0){
+                  m=1;
+                  definirResultado(this.id);
+                  app.popover.close(".popoverResultados",true);
+              };
+          });  
+            
           /*resultado=JSON.stringify(item)
           console.log("item: "+resultado);
           console.log(item.address.street+", " +item.address.houseNumber+", " 
@@ -385,25 +406,27 @@ function crearRegistro(){
 
           //CUANDO AGREGO LA FUNCION ADDMARKERTOGROUP DEJA DE FUNCIONAR BIEN LA FUNCION, ME MUESTRA UN SOLO RESULTADO
           //addMarkerToGroup(group, {lat: item.position.lat , lng: item.position.lng});
-
         });
-        /*
+        
         for ( i = 1; i <= indice; i++) {
-        group.addObject(["marcador"+i]);
+          console.log("indice: "+indice);
+        /*group.addObject(["marcador"+i]);
          map.addObject(group);
          // get geo bounding box for the group and set it to the map
         map.getViewModel().setLookAtData({
           bounds: group.getBoundingBox()
         });
-        };
         */
-        console.log(indice);
-      }, alert);
+        };
+        
+      }, alert, );
+
+      
     };
-     function addMarkerToGroup(group, coordinatel) {
-      var marker = new H.map.Marker(coordinate);
-      group.addObject(marker);     
-    };
+    function chequeando (numero){
+      console.log(numero);
+    }
+     
 
     function definirResultado(a){
        service = platform.getSearchService();
@@ -414,11 +437,12 @@ function crearRegistro(){
       // communication error occurs):
         console.log("entró a la funcion de definicion de resultado");
       
-
+       // map.removeObjets(map.getObjets ());
       service.geocode({
         q: query
       }, (result) => {
         console.log("tomó el query");
+
         // Add a marker for each location found
         result.items.forEach((item) => {
           map.addObject(new H.map.Marker(item.position));
@@ -471,10 +495,16 @@ function crearRegistro(){
           zoom: 15,
           center: { lng: lonUsuario, lat: latUsuario }
         });
-
+      var svgMarkup = '<svg width="24" height="24" ' +
+        'xmlns="http://www.w3.org/2000/svg">' +
+        '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
+        'height="22" /><text x="12" y="18" font-size="12pt" ' +
+        'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+        'fill="white">O</text></svg>';
+      var icon = new H.map.Icon(svgMarkup);
       if (latUsuario!=0 && lonUsuario!=0) {
-        coordsUsu = {lat: latUsuario, lng: lonUsuario},
-        markerUsu = new H.map.Marker(coordsUsu);
+        coordsUsu = {lat: latUsuario, lng: lonUsuario};
+        markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
         map.addObject(markerUsu);
         map.setCenter(coordsUsu); // centrar el mapa en una coordenada
     }
@@ -540,11 +570,13 @@ function crearRegistro(){
         
     };
     function setUpClickListener(map) {
+      console.log("coords:");
       //esta funcion deberia detectar un click en la pantalla y llamar a la funcion addMarker
         map.addEventListener('tap', function (evt) {
           var coord = map.screenToGeo(evt.currentPointer.viewportX,
                   evt.currentPointer.viewportY);
            addMarker(coord);
+
         });
       };
       function addMarker(coordinates){
@@ -565,13 +597,14 @@ function crearRegistro(){
 
 
         var dynamicPopover = app.popover.create({
+          El: '.popoverResultados',
           targetEl: '#busqueda',
 
           content: '<div class="popover popoverResultados">'+
                       '<div class="popover-inner">'+
                         '<div class="list">'+
                           '<ul id="resultados">'+
-                            
+                            '<li><a class="list-button item-link " id="cerrarPopover" href="#">Elegir en el mapa</a></li>'+
                           '</ul>'+
                         '</div>'+
                       '</div>'+
@@ -590,9 +623,32 @@ function crearRegistro(){
         });
         
         dynamicPopover.open();
+        $$("#cerrarPopover").on("click", function(){
+          l=1;
+          app.popover.close(".popoverResultados",true);
+          container = new H.map.Group({
+                objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9]
+              });
+              map.addObject(container);
+          map.getViewModel().setLookAtData({
+          bounds: container.getBoundingBox()
+
+        });
+        })
       };
 
-
+      function agregarYquitarGrupo(){
+            if (l==0){
+              l=1;
+              
+            }else{
+              if (l==1){
+                
+                l=0;
+                agregarYquitarGrupo();
+              };
+            };
+          };
    
 
     /*
