@@ -63,6 +63,9 @@ var marcador6;
 var marcador7;
 var marcador8;
 var marcador9;
+var marcador10;
+var marcador11;
+var marcador12;
 var l=0;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
@@ -619,6 +622,8 @@ function crearRegistro(){
           l=1;
           app.popover.close(".popoverResultados",true);
           console.log(indice+"indice");
+          
+          
           if(indice==1){
               container = new H.map.Group({
                   objects: [marcador1]
@@ -630,7 +635,7 @@ function crearRegistro(){
           }else{
             if(indice==2){
               container = new H.map.Group({
-                  objects: [marcador1, marcador2]
+                  objects: [marcador1]
                 });
               map.addObject(container);
               map.getViewModel().setLookAtData({
@@ -639,7 +644,7 @@ function crearRegistro(){
             }else{
               if(indice==3){
                 container = new H.map.Group({
-                    objects: [marcador1, marcador2, marcador3]
+                    objects: [marcador1, marcador2]
                   });
                 map.addObject(container);
                 map.getViewModel().setLookAtData({
@@ -648,7 +653,7 @@ function crearRegistro(){
               }else{
                 if(indice==4){
                   container = new H.map.Group({
-                      objects: [marcador1, marcador2, marcador3, marcador4]
+                      objects: [marcador1, marcador2, marcador3]
                     });
                   map.addObject(container);
                   map.getViewModel().setLookAtData({
@@ -657,7 +662,7 @@ function crearRegistro(){
                 }else{
                   if(indice==5){
                     container = new H.map.Group({
-                        objects: [marcador1, marcador2, marcador3, marcador4, marcador5]
+                        objects: [marcador1, marcador2, marcador3, marcador4]
                       });
                     map.addObject(container);
                     map.getViewModel().setLookAtData({
@@ -666,7 +671,7 @@ function crearRegistro(){
                   }else{
                     if(indice==6){
                       container = new H.map.Group({
-                          objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6]
+                          objects: [marcador1, marcador2, marcador3, marcador4, marcador5]
                         });
                       map.addObject(container);
                       map.getViewModel().setLookAtData({
@@ -675,7 +680,7 @@ function crearRegistro(){
                     }else{
                       if(indice==7){
                         container = new H.map.Group({
-                            objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7]
+                            objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6]
                           });
                         map.addObject(container);
                         map.getViewModel().setLookAtData({
@@ -684,7 +689,7 @@ function crearRegistro(){
                       }else{
                         if(indice==8){
                           container = new H.map.Group({
-                              objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8]
+                              objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7]
                             });
                           map.addObject(container);
                           map.getViewModel().setLookAtData({
@@ -693,7 +698,7 @@ function crearRegistro(){
                         }else{
                           if(indice==9){
                             container = new H.map.Group({
-                                objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9]
+                                objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8]
                               });
                             map.addObject(container);
                             map.getViewModel().setLookAtData({
@@ -702,7 +707,7 @@ function crearRegistro(){
                           }else{
                             if(indice==10){
                               container = new H.map.Group({
-                                  objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10]
+                                  objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9]
                                 });
                               map.addObject(container);
                               map.getViewModel().setLookAtData({
@@ -711,7 +716,7 @@ function crearRegistro(){
                             }else{
                               if(indice==11){
                                 container = new H.map.Group({
-                                    objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11]
+                                    objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10]
                                   });
                                 map.addObject(container);
                                 map.getViewModel().setLookAtData({
@@ -720,12 +725,102 @@ function crearRegistro(){
                               }else{
                                 if(indice==12){
                                   container = new H.map.Group({
-                                      objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12]
+                                      objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11]
                                     });
                                   map.addObject(container);
                                   map.getViewModel().setLookAtData({
                                     bounds: container.getBoundingBox()
                                   });
+                                }else{
+                                  if(indice==13){
+                                    container = new H.map.Group({
+                                        objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12]
+                                      });
+                                    map.addObject(container);
+                                    map.getViewModel().setLookAtData({
+                                      bounds: container.getBoundingBox()
+                                    });
+                                  }else{
+                                    if(indice==14){
+                                      container = new H.map.Group({
+                                          objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13]
+                                        });
+                                      map.addObject(container);
+                                      map.getViewModel().setLookAtData({
+                                        bounds: container.getBoundingBox()
+                                      });
+                                    }else{
+                                      if(indice==15){
+                                        container = new H.map.Group({
+                                            objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14]
+                                          });
+                                        map.addObject(container);
+                                        map.getViewModel().setLookAtData({
+                                          bounds: container.getBoundingBox()
+                                        });
+                                      }else{
+                                        if(indice==16){
+                                          container = new H.map.Group({
+                                              objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15]
+                                            });
+                                          map.addObject(container);
+                                          map.getViewModel().setLookAtData({
+                                            bounds: container.getBoundingBox()
+                                          });
+                                        }else{
+                                          if(indice==17){
+                                            container = new H.map.Group({
+                                                objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15, marcador16]
+                                              });
+                                            map.addObject(container);
+                                            map.getViewModel().setLookAtData({
+                                              bounds: container.getBoundingBox()
+                                            });
+                                          }else{
+                                            if(indice==18){
+                                              container = new H.map.Group({
+                                                  objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15, marcador16, marcador17]
+                                                });
+                                              map.addObject(container);
+                                              map.getViewModel().setLookAtData({
+                                                bounds: container.getBoundingBox()
+                                              });
+                                            }else{
+                                              if(indice==19){
+                                                container = new H.map.Group({
+                                                    objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15, marcador16, marcador17, marcador18]
+                                                  });
+                                                map.addObject(container);
+                                                map.getViewModel().setLookAtData({
+                                                  bounds: container.getBoundingBox()
+                                                });
+                                              }else{
+                                                if(indice==20){
+                                                  container = new H.map.Group({
+                                                      objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15, marcador16, marcador17, marcador18, marcador19]
+                                                    });
+                                                  map.addObject(container);
+                                                  map.getViewModel().setLookAtData({
+                                                    bounds: container.getBoundingBox()
+                                                  });
+                                                }else{
+                                                  if(indice==21){
+                                                    container = new H.map.Group({
+                                                        objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10, marcador11, marcador12, marcador13, marcador14, marcador15, marcador16, marcador17, marcador18, marcador19, marcador20]
+                                                      });
+                                                    map.addObject(container);
+                                                    map.getViewModel().setLookAtData({
+                                                      bounds: container.getBoundingBox()
+                                                    });
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
                                 }
                               }
                             }
@@ -738,7 +833,60 @@ function crearRegistro(){
               }
             }
           }
-   
+          /*
+          switch(indice){
+            case 1:
+
+            break
+            case 2:
+
+            break
+            case 3:
+
+            break
+            case 4:
+
+            break
+            case 5:
+
+            break
+            case 6:
+
+            break
+            case 7:
+
+            break
+            case 8:
+
+            break
+            case 9:
+
+            break
+            case 10:
+              container = new H.map.Group({
+                                  objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10]
+                                });
+                              map.addObject(container);
+                              map.getViewModel().setLookAtData({
+                                bounds: container.getBoundingBox()
+                              });
+            break
+            case 11:
+
+            break
+            case 12:
+
+            break
+            case 13:
+
+            break
+            case 14:
+
+            break
+            case 15:
+
+            break
+          }*/
         })
       };
 
