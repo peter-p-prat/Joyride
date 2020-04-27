@@ -54,6 +54,8 @@ var map;
 var queryBusqueda = " ";
 var indice = 0;
 var container;
+var container2;
+var marcador;
 var marcador1;
 var marcador2;
 var marcador3;
@@ -67,8 +69,12 @@ var marcador10;
 var marcador11;
 var marcador12;
 var l=0;
+var n=0;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
+    
+    
+
     console.log("Device is ready!");
     //para que funcione hay que darle al ENTER del teclado!
     $$("#busqueda").change(function(){
@@ -84,16 +90,14 @@ $$(document).on('deviceready', function() {
     setUpClickListener(map);
     
 
-    db = firebase.firestore();
-    refUsuarios = db.collection("USUARIOS");
-    refTiposUsuarios= db.collection("TIPOS_USUARIOS");
 
-    var iniciarDatos = 0;
+    var iniciarDatos = 1;
     if ( iniciarDatos == 1 ) {
         fnIniciarDatos();
     }
-
-
+    
+    $$(".guardarBd").on('click', guardar);
+    $$("#consultarBd").on('click', consultar);
 
     var panel = app.panel.create({
           el: '.panel-registro',
@@ -104,7 +108,7 @@ $$(document).on('deviceready', function() {
               }
     });
 
-
+ 
     //$$('#enviarRegistro').on('click', crearRegistro());
     $$('#enviarRegistro').on('click', crearRegistro);
     
@@ -131,6 +135,13 @@ $$(document).on('page:init', function (e) {
     // Do something here when page loaded and initialized
     console.log(e);
 
+    db = firebase.firestore();
+    refUsuarios = db.collection("USUARIOS");
+    refTiposUsuarios= db.collection("TIPOS_USUARIOS");
+
+
+
+
 });
 
 // Option 2. Using live 'page:init' event handlers for each page
@@ -139,75 +150,12 @@ $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     console.log(e);
     setUpClickListener(map);
     
-     
+     $$('.guardarBd').on('click', guardar);
 
 
 }); // AGREGADO
 
-$$(document).on('page:init', '.page[data-name="mapa"]', function (e) {
-    // Do something here when page with data-name="about" attribute loaded and initialized
-    
-    // Initialize the platform object:
-      var platform = new H.service.Platform({
-        'apikey': 'Xl9vUwLE6MN47LOIbl3Fl5yVRvWjB3-_z-F0gJWecmA'
-      });
 
-      // Obtain the default map types from the platform object
-      var maptypes = platform.createDefaultLayers();
-      //var layers =  platform.createDefaultLayers();
-      // Instantiate (and display) a map object:
-      var map = new H.Map(
-        document.getElementById('mapContainer'),
-        maptypes.vector.normal.map,
-        //layers.raster.terrain.transit
-        {
-          zoom: 15,
-          center: { lng: lonUsuario, lat: latUsuario }
-        });
-
-      if (latUsuario!=0 && lonUsuario!=0) {
-        coordsUsu = {lat: latUsuario, lng: lonUsuario},
-        markerUsu = new H.map.Marker(coordsUsu);
-        map.addObject(markerUsu);
-    }
-
-      // Enable the event system on the map instance:
-      var mapEvents = new H.mapevents.MapEvents(map);
-      // Instantiate the default behavior, providing the mapEvents object:
-      var behavior = new H.mapevents.Behavior(mapEvents);
-
-      // Get an instance of the geocoding service:
-      var service = platform.getSearchService();
-
-      // Call the geocode method with the geocoding parameters,
-      // the callback and an error callback function (called if a
-      // communication error occurs):
-      service.geocode({
-        q: '200 S Mathilda Ave, Sunnyvale, CA'
-      }, (result) => {
-        // Add a marker for each location found
-        result.items.forEach((item) => {
-          map.addObject(new H.map.Marker(item.position));
-        });
-      }, alert);
-
-        // Crea interfaz de usuario (zoom, capas y barra de escala)
-      var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
-      
-      /*  PARA SETEAR UBICACION DE COMANDOS
-      var mapSettings = ui.getControl('mapsettings');
-      var zoom = ui.getControl('zoom');
-      var scalebar = ui.getControl('scalebar');
-
-      mapSettings.setAlignment('bottom-right');
-      zoom.setAlignment('bottom-right');
-      scalebar.setAlignment('bottom-right');
-      */
-    
-     
-
-
-}); // AGREGADO
 
 // Option 2. Using live 'page:init' event handlers for each page
 $$(document).on('page:init', '.page[data-name="about"]', function (e) {
@@ -227,7 +175,68 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
 
 
 /** FUNCIONES PROPIAS **/
+    function guardar() {
+      console.log("hello World");
+      console.log(correo);
+      
+      var data = {
+          nombre: "pedro",
+          apellido: clave,
+          web: "web.com",
+          telefono: "1234",
+          fnac: "01/01/1999",
+          tipo: "VIS"
+        }
+        refUsuarios.doc(correo).set(data);
+      
+    }
+    function consultar(){
+      var apellido="";
+      var consulta = db.collection("USUARIOS").doc(correo);
+        consulta.get().then(function(doc){
+          if (doc.exists) {
+            console.log("document data: ", doc.data().apellido);
+            apellido= doc.data().apellido;
+            console.log("apellido: "+ apellido);
+          } else {
+            //doc.data() will be undefined un this case
+            console.log("no such document");
+          }
+        }).catch(function(error){
+          console.log("error getting document:",error);
+        });
+      
+    };
+    function fnIniciarDatos() {
 
+        codido = "VIS"; tipo = "Visitantes"; saludo = "Hola Visitante";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
+
+        codido = "ADM"; tipo = "Administrador"; saludo = "Hola Mr. Admin";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
+
+        codido = "COM"; tipo = "Comercio"; saludo = "Hola Comercio";
+        var data = {
+          tipo: tipo, saludo: saludo
+        }
+        refTiposUsuarios.doc(codido).set(data);
+
+        var data = {
+          nombre: "Admin",
+          apellido: "Apellido",
+          web: "web.com",
+          telefono: "1234",
+          fnac: "01/01/1999",
+          tipo: "ADM"
+        }
+        refUsuarios.doc("admin@admin.com").set(data);
+    };
 
 function crearRegistro(){
         var correo = $$('#emailRegistro').val();
@@ -360,7 +369,7 @@ function crearRegistro(){
       if (l==1){
         container.removeAll();
       };
-      
+
 
       service.geocode({
         q: queryBusqueda
@@ -376,6 +385,36 @@ function crearRegistro(){
           console.log(indice);
          // map.addObject(new H.map.Marker(item.position));
           eval("marcador"+indice+" = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+
+
+// VER OPCION
+/*
+var marcadores = []; // como variable global
+
+marcadores[i] = new H.map...........
+
+
+OPCION 2:
+var marcadores = [];
+
+marcador = new H.map..........
+marcadores.push(marcador)
+PUSH agrega un elemento al array
+
+
+y abajo
+
+objects: marcadores
+
+
+
+
+
+
+
+
+*/
+
          // var brandenburgerTorMarker = new H.map.Marker(new H.geo.Point(52.516237, 13.377686));
           console.log("lat: "+item.position.lat);
           console.log("lng: "+item.position.lng);
@@ -421,42 +460,55 @@ function crearRegistro(){
     function chequeando (numero){
       console.log(numero);
     }
-     
+    
+    
 
     function definirResultado(a){
        service = platform.getSearchService();
-      query=a;
+       query=a;
       
-      // Call the geocode method with the geocoding parameters,
-      // the callback and an error callback function (called if a
-      // communication error occurs):
+        // Call the geocode method with the geocoding parameters,
+        // the callback and an error callback function (called if a
+        // communication error occurs):
         console.log("entró a la funcion de definicion de resultado");
-      
+      if (n==1){
+          container2.removeAll();
+          console.log("tendria que borrar"+n);
+        }
        // map.removeObjets(map.getObjets ());
       service.geocode({
         q: query
       }, (result) => {
         console.log("tomó el query");
-
+        
+        n=1;
         // Add a marker for each location found
         result.items.forEach((item) => {
-          map.addObject(new H.map.Marker(item.position));
-          console.log("lat: "+item.position.lat);
-          console.log("lng: "+item.position.lng);
-          console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
           
-          latBusqueda = item.position.lat;
-          lngBusqueda = item.position.lng;
-          coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
-          map.setCenter(coordsBusqueda);
+
+            
+           
+            eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+            container2 = new H.map.Group({
+                  objects: [marcador]
+                });
+              map.addObject(container2);
+            console.log("lat: "+item.position.lat);
+            console.log("lng: "+item.position.lng);
+            console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
+            
+            latBusqueda = item.position.lat;
+            lngBusqueda = item.position.lng;
+            coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
+            map.setCenter(coordsBusqueda);
+            
+            /*resultado=JSON.stringify(item)
+            console.log("item: "+resultado);
+            console.log(item.address.street+", " +item.address.houseNumber+", " 
+              +item.address.city+", " +item.address.state+", " +item.address.countryName);
+            */
+
           
-          /*resultado=JSON.stringify(item)
-          console.log("item: "+resultado);
-          console.log(item.address.street+", " +item.address.houseNumber+", " 
-            +item.address.city+", " +item.address.state+", " +item.address.countryName);
-          */
-
-
         });
       }, alert);
     }
@@ -490,18 +542,18 @@ function crearRegistro(){
           zoom: 15,
           center: { lng: lonUsuario, lat: latUsuario }
         });
-      var svgMarkup = '<svg width="24" height="24" ' +
-        'xmlns="http://www.w3.org/2000/svg">' +
-        '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
-        'height="22" /><text x="12" y="18" font-size="12pt" ' +
-        'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
-        'fill="white">O</text></svg>';
-      var icon = new H.map.Icon(svgMarkup);
-      if (latUsuario!=0 && lonUsuario!=0) {
-        coordsUsu = {lat: latUsuario, lng: lonUsuario};
-        markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
-        map.addObject(markerUsu);
-        map.setCenter(coordsUsu); // centrar el mapa en una coordenada
+        var svgMarkup = '<svg width="24" height="24" ' +
+          'xmlns="http://www.w3.org/2000/svg">' +
+          '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
+          'height="22" /><text x="12" y="18" font-size="12pt" ' +
+          'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+          'fill="white">O</text></svg>';
+        var icon = new H.map.Icon(svgMarkup);
+        if (latUsuario!=0 && lonUsuario!=0) {
+          coordsUsu = {lat: latUsuario, lng: lonUsuario};
+          markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
+          map.addObject(markerUsu);
+          map.setCenter(coordsUsu); // centrar el mapa en una coordenada
     }
 
       // Enable the event system on the map instance:
@@ -565,6 +617,9 @@ function crearRegistro(){
         
     };
     function setUpClickListener(map) {
+
+return 0;
+
       console.log("coords:");
       //esta funcion deberia detectar un click en la pantalla y llamar a la funcion addMarker
         map.addEventListener('tap', function (evt) {
@@ -833,60 +888,7 @@ function crearRegistro(){
               }
             }
           }
-          /*
-          switch(indice){
-            case 1:
-
-            break
-            case 2:
-
-            break
-            case 3:
-
-            break
-            case 4:
-
-            break
-            case 5:
-
-            break
-            case 6:
-
-            break
-            case 7:
-
-            break
-            case 8:
-
-            break
-            case 9:
-
-            break
-            case 10:
-              container = new H.map.Group({
-                                  objects: [marcador1, marcador2, marcador3, marcador4, marcador5, marcador6, marcador7, marcador8, marcador9, marcador10]
-                                });
-                              map.addObject(container);
-                              map.getViewModel().setLookAtData({
-                                bounds: container.getBoundingBox()
-                              });
-            break
-            case 11:
-
-            break
-            case 12:
-
-            break
-            case 13:
-
-            break
-            case 14:
-
-            break
-            case 15:
-
-            break
-          }*/
+          
         })
       };
 
@@ -894,80 +896,11 @@ function crearRegistro(){
 
 
 
-      function agregarYquitarGrupo(){
-            if (l==0){
-              l=1;
-              
-            }else{
-              if (l==1){
-                
-                l=0;
-                agregarYquitarGrupo();
-              };
-            };
-          };
-   
-
-    /*
-    url = 'https://geocoder.ls.hereapi.com/6.2/geocode.json';
-      app.request.json(url, {
-          searchtext: queryBusqueda,
-          apiKey: 'kyLgrWlL89_29OBHanpZbd2Jb49Xy46GgIKSioggFEU',
-          gen: '9'
-        }, function (data) {
-           // hacer algo con data
-           console.log("geo:" + data);
-
-
-          // POSICION GEOCODIFICADA de la direccion
-          latitud = data.Response.View[0].Result[0].Location.DisplayPosition.Latitude;
-          longitud = data.Response.View[0].Result[0].Location.DisplayPosition.Longitude;
-          //alert(latitud + " / " + longitud);
-              coordsG = {lat: latitud, lng: longitud},
-              markerG = new H.map.Marker(coordsG);
-              map.addObject(markerG);
-              
-          //     alert(JSON.stringify(data));
-          }, function(xhr, status) { console.log("error geo: "+status); }   );
-    */  
-
-
-
-    function fnIniciarDatos() {
-
-        codido = "VIS"; tipo = "Visitantes"; saludo = "Hola Visitante";
-        var data = {
-          tipo: tipo, saludo: saludo
-        }
-        refTiposUsuarios.doc(codido).set(data);
-
-        codido = "ADM"; tipo = "Administrador"; saludo = "Hola Mr. Admin";
-        var data = {
-          tipo: tipo, saludo: saludo
-        }
-        refTiposUsuarios.doc(codido).set(data);
-
-        codido = "COM"; tipo = "Comercio"; saludo = "Hola Comercio";
-        var data = {
-          tipo: tipo, saludo: saludo
-        }
-        refTiposUsuarios.doc(codido).set(data);
-
-        var data = {
-          nombre: "Admin",
-          apellido: "Apellido",
-          web: "web.com",
-          telefono: "1234",
-          fnac: "01/01/1999",
-          tipo: "ADM"
-        }
-        refUsuarios.doc("admin@admin.com").set(data);
-    };
-
-    
 
     function consultarLocalStorage(){
         
+return 0;
+
         var usuarioGuardado = storage.getItem("usuario");
         usuarioGuardado = JSON.parse(usuarioGuardado);
 
@@ -992,7 +925,7 @@ function crearRegistro(){
 
     function LoguearseConLocal(u,c ){
              console.log("loguearseconlocal, u+c"+u+c)
-             
+             correo=u;
         //Se declara la variable huboError (bandera)
         var huboError = 0;     
         firebase.auth().signInWithEmailAndPassword(u, c)
