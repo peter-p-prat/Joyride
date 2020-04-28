@@ -70,9 +70,20 @@ var marcador11;
 var marcador12;
 var l=0;
 var n=0;
+//variables para interaccion con mapa
+var ubicacionUsuario;
+var coord;
+var dynamicSheet;
+var coordenadas;
+var label;
+var locationId;
+var d=0;
+var marker;
+var u=0;
+var g=0;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
-    
+   
     
 
     console.log("Device is ready!");
@@ -87,7 +98,7 @@ $$(document).on('deviceready', function() {
     geolocalizacion();
 
     consultarLocalStorage();
-    setUpClickListener(map);
+    
     
 
 
@@ -98,6 +109,8 @@ $$(document).on('deviceready', function() {
     
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
+    $$(".Ubicame").on('click', ubicame);
+
 
     var panel = app.panel.create({
           el: '.panel-registro',
@@ -126,7 +139,7 @@ $$(document).on('deviceready', function() {
     //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
     $$("#google").on('click', loginConGoogle);
 
-    $$(".contenedormapa").on("click", setUpClickListener(map));
+   
 
 });
 
@@ -148,7 +161,7 @@ $$(document).on('page:init', function (e) {
 $$(document).on('page:init', '.page[data-name="index"]', function (e) {
     // Do something here when page with data-name="about" attribute loaded and initialized
     console.log(e);
-    setUpClickListener(map);
+    
     
      $$('.guardarBd').on('click', guardar);
 
@@ -512,6 +525,14 @@ objects: marcadores
         });
       }, alert);
     }
+    function ubicame(){
+      console.log("te llevo a donde vos estes");
+      //se ejecuta solo cuando hago click en el boton del index
+      
+            
+            map.setCenter(coordsUsu); // centrar el mapa en una coordenada
+          
+    };
     function geolocalizacion(){
 
         // onSuccess Callback
@@ -524,7 +545,7 @@ objects: marcadores
           lonUsuario = position.coords.longitude;
           console.log(latUsuario);
           console.log(lonUsuario);
-
+          ubicacionUsuario = latUsuario+","+lonUsuario;
           // Initialize the platform object:
       platform = new H.service.Platform({
         'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
@@ -554,7 +575,8 @@ objects: marcadores
           markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
           map.addObject(markerUsu);
           map.setCenter(coordsUsu); // centrar el mapa en una coordenada
-    }
+        };
+        
 
       // Enable the event system on the map instance:
       var mapEvents = new H.mapevents.MapEvents(map);
@@ -568,10 +590,114 @@ objects: marcadores
       // the callback and an error callback function (called if a
       // communication error occurs):
 
-     
-        
-      
+     // Add event listeners:
+      map.addEventListener('longpress', function(evt) {
+          // Log 'tap' and 'mouse' events:
+          console.log(evt.type, evt.currentPointer.type);
+          
+          coord = map.screenToGeo(evt.currentPointer.viewportX,
+                  evt.currentPointer.viewportY);
 
+          coordenadas=coord.lat+","+coord.lng;
+          if(u==1){
+            map.removeObject(marker)
+          };
+          if(l==1){
+          map.removeObject(container);
+          };
+          /*
+          var bubble =  new H.ui.InfoBubble(coord, {
+                  content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
+                 });
+          
+          ui.addBubble(bubble); */
+           //addMarker(coord);
+           function reverseGeocode(platform) {
+              var geocoder = platform.getGeocodingService(),
+                parameters = {
+                  prox: coordenadas,
+                  mode: 'retrieveAddresses',
+                  maxresults: '1',
+                  gen: '9'};
+
+              geocoder.reverseGeocode(parameters,
+                function (result) {
+                  g=1;
+                  console.log("aca estamos");
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                  locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                  label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                  if (g==1){
+                    crearDynamicSheet();
+                    agregarMarcadorAlCliquear();
+                  };
+                }, function (error) {
+                  alert(error);
+                }
+              );
+          };
+            if (d==1){
+            dynamicSheet.close();
+            }
+
+
+            
+            reverseGeocode(platform)
+            console.log(coordenadas);
+            console.log(coord.lat+","+coord.lng);
+      });
+
+
+        
+      function crearDynamicSheet(){
+        d=1;
+              dynamicSheet = app.sheet.create({
+                El: ".hojamarcador",
+                backdropEl: ".contenedormapa",
+                swipeToClose: true,
+                swipeToStep: true,
+                 backdrop: true,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+label+'</h2>'+
+                                    '<div class="row">'+
+                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
+                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
+                                    '</div>'+
+                                    '<p>Tus coordenadas son:</p>'+
+                                    '<p>'+coordenadas+'</p>'+
+                                    '<p>Location Id para rutear:</p>'+
+                                    '<p>'+locationId+'</p>'+
+                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              dynamicSheet.open();
+              $$(".crearRuta").on('click',function(){
+                  crearRuta(this.id);
+                  dynamicSheet.close();
+                  map.removeObject(marker);
+              
+          });  
+      };
+      function agregarMarcadorAlCliquear(){
+            u=1;
+            marker = new H.map.Marker(coord);
+          
+          map.addObject(marker);
+          map.setCenter(coord);
+      };  
+     
       
       
 
@@ -616,30 +742,85 @@ objects: marcadores
 
         
     };
-    function setUpClickListener(map) {
 
-return 0;
+    function crearRuta(r){
+      // Create the parameters for the routing request:
+var routingParameters = {
+  // The routing mode:
+  'mode': 'fastest;car',
+  // The start point of the route:
+  'waypoint0': ubicacionUsuario,
+  // The end point of the route:
+  'waypoint1': r,
+  // To retrieve the shape of the route we choose the route
+  // representation mode 'display'
+  'representation': 'display'
+};
 
-      console.log("coords:");
-      //esta funcion deberia detectar un click en la pantalla y llamar a la funcion addMarker
-        map.addEventListener('tap', function (evt) {
-          var coord = map.screenToGeo(evt.currentPointer.viewportX,
-                  evt.currentPointer.viewportY);
-           addMarker(coord);
+// Define a callback function to process the routing response:
+var onResult = function(result) {
+  var route,
+    routeShape,
+    startPoint,
+    endPoint,
+    linestring;
+  if(result.response.route) {
+  // Pick the first route from the response:
+  route = result.response.route[0];
+  // Pick the route's shape:
+  routeShape = route.shape;
 
-        });
-      };
-      function addMarker(coordinates){
-        //esta funcion deberia agregar un marcador y una burbuja en las coordenadas que le pasa la funcion setUpClickListener
-          var marker = new H.map.Marker({lat:coordinates.lat, lng: coordinates.lng});
-          map.addObject(marker);
+  // Create a linestring to use as a point source for the route line
+  linestring = new H.geo.LineString();
 
-          var bubble =  new H.ui.InfoBubble({lat:coordinates.lat, lng: coordinates.lng}, {
-                  content: '<b>Hello World!</b>'
-                 });
-          // show info bubble
-          ui.addBubble(bubble);
-      };
+  // Push all the points in the shape into the linestring:
+  routeShape.forEach(function(point) {
+    var parts = point.split(',');
+    linestring.pushLatLngAlt(parts[0], parts[1]);
+  });
+
+  // Retrieve the mapped positions of the requested waypoints:
+  startPoint = route.waypoint[0].mappedPosition;
+  endPoint = route.waypoint[1].mappedPosition;
+
+  // Create a polyline to display the route:
+  var routeLine = new H.map.Polyline(linestring, {
+    style: { strokeColor: 'blue', lineWidth: 3 }
+  });
+
+  // Create a marker for the start point:
+  var startMarker = new H.map.Marker({
+    lat: startPoint.latitude,
+    lng: startPoint.longitude
+  });
+
+  // Create a marker for the end point:
+  var endMarker = new H.map.Marker({
+    lat: endPoint.latitude,
+    lng: endPoint.longitude
+  });
+
+  // Add the route polyline and the two markers to the map:
+  map.addObjects([routeLine, startMarker, endMarker]);
+
+  // Set the map's viewport to make the whole route visible:
+  map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
+  }
+};
+
+// Get an instance of the routing service:
+var router = platform.getRoutingService();
+
+// Call calculateRoute() with the routing parameters,
+// the callback and an error callback function (called if a
+// communication error occurs):
+router.calculateRoute(routingParameters, onResult,
+  function(error) {
+    alert(error.message);
+  });
+    }
+
+    
       
      
 
@@ -687,6 +868,7 @@ return 0;
               map.getViewModel().setLookAtData({
                 bounds: container.getBoundingBox()
               });
+              map.removeObject(marker);
           }else{
             if(indice==2){
               container = new H.map.Group({
@@ -696,6 +878,7 @@ return 0;
               map.getViewModel().setLookAtData({
                 bounds: container.getBoundingBox()
               });
+              map.removeObject(marker);
             }else{
               if(indice==3){
                 container = new H.map.Group({
@@ -705,6 +888,7 @@ return 0;
                 map.getViewModel().setLookAtData({
                   bounds: container.getBoundingBox()
                 });
+              map.removeObject(marker);
               }else{
                 if(indice==4){
                   container = new H.map.Group({
@@ -714,6 +898,7 @@ return 0;
                   map.getViewModel().setLookAtData({
                     bounds: container.getBoundingBox()
                   });
+              map.removeObject(marker);
                 }else{
                   if(indice==5){
                     container = new H.map.Group({
@@ -723,6 +908,7 @@ return 0;
                     map.getViewModel().setLookAtData({
                       bounds: container.getBoundingBox()
                     });
+              map.removeObject(marker);
                   }else{
                     if(indice==6){
                       container = new H.map.Group({
@@ -732,6 +918,7 @@ return 0;
                       map.getViewModel().setLookAtData({
                         bounds: container.getBoundingBox()
                       });
+              map.removeObject(marker);
                     }else{
                       if(indice==7){
                         container = new H.map.Group({
@@ -741,6 +928,7 @@ return 0;
                         map.getViewModel().setLookAtData({
                           bounds: container.getBoundingBox()
                         });
+              map.removeObject(marker);
                       }else{
                         if(indice==8){
                           container = new H.map.Group({
@@ -749,7 +937,8 @@ return 0;
                           map.addObject(container);
                           map.getViewModel().setLookAtData({
                             bounds: container.getBoundingBox()
-                          });
+                          });;
+              map.removeObject(marker);
                         }else{
                           if(indice==9){
                             container = new H.map.Group({
@@ -758,7 +947,8 @@ return 0;
                             map.addObject(container);
                             map.getViewModel().setLookAtData({
                               bounds: container.getBoundingBox()
-                            });
+                            });;
+              map.removeObject(marker);
                           }else{
                             if(indice==10){
                               container = new H.map.Group({
@@ -767,7 +957,8 @@ return 0;
                               map.addObject(container);
                               map.getViewModel().setLookAtData({
                                 bounds: container.getBoundingBox()
-                              });
+                              });;
+              map.removeObject(marker);
                             }else{
                               if(indice==11){
                                 container = new H.map.Group({
@@ -899,7 +1090,7 @@ return 0;
 
     function consultarLocalStorage(){
         
-return 0;
+//return 0;
 
         var usuarioGuardado = storage.getItem("usuario");
         usuarioGuardado = JSON.parse(usuarioGuardado);

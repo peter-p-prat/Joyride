@@ -12,7 +12,7 @@
         
     
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline'; font-src * data: URIs ">
-     -->
+     
      <meta http-equiv="Content-Security-Policy"
     content="
       default-src   * 'self' 'unsafe-inline' 'unsafe-eval';
@@ -24,7 +24,7 @@
       connect-src   * data: blob: file: 'self' 'unsafe-inline' 'unsafe-eval';
       worker-src    * data: blob: file: 'self' 'unsafe-inline' 'unsafe-eval';
       ">
-
+      -->
     <!-- Required meta tags-->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
@@ -189,10 +189,15 @@
                   <div class="popover-resultados"></div>
 
                   <div class="contenedormapa block block-strong text-align-center">
-                    <div style="width: 100vw; height: 80vh" id="mapContainer1"><div id="consultarBd" class="boton button button-round button-fill">Consultar Base de Datos</div></div>
+                    <div style="width: 100vw; height: 80vh" id="mapContainer1"><div id="consultarBd" class="boton button button-round button-fill" style="opacity:0.85">Consultar Base de Datos</div></div>
                     
                   </div>
-                  <div  class="guardarBd boton button button-round button-fill">Guardar en Base de Datos</div>
+                  <div class="row no-gap">
+                      <!-- Each "cell" has col-[width in percents] class -->
+                      <div class="col-50 guardarBd boton button button-round button-fill" style="opacity:0.85">Guardar en Base de Datos</div>
+                      <div class="col-50 Ubicame boton button button-round button-fill" style="opacity:0.85">Mi ubicacion</div>
+                  </div>
+                  
                   <!--   
                   <div class="block">
                     <h3 >Contenido del Index</h3>

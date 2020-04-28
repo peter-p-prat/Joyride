@@ -19,6 +19,13 @@
 #consultarBd{
 	z-index: 2;
 }
+.crearRuta{
+	z-index: 2;
+};
+
+.hojamarcador{
+	opacity: 0.5;
+}
 .contenedormapa {
 	height: 85vh;
 	width: 100vw;
