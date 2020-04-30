@@ -81,6 +81,11 @@ var d=0;
 var marker;
 var u=0;
 var g=0;
+//variables para tracking/calculo distancia
+var lat2;
+var lon2;
+//variables para alarmas
+
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
    
@@ -96,7 +101,7 @@ $$(document).on('deviceready', function() {
     })
 
     geolocalizacion();
-
+    //setInterval(recalculaPosicion,3000);
     consultarLocalStorage();
     
     
@@ -109,7 +114,7 @@ $$(document).on('deviceready', function() {
     
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
-    $$(".Ubicame").on('click', ubicame);
+    $$(".Ubicame").on('click', ubicame); 
 
 
     var panel = app.panel.create({
@@ -498,8 +503,12 @@ objects: marcadores
         // Add a marker for each location found
         result.items.forEach((item) => {
           
-
-            
+            if (d==1){
+              dynamicSheet.close();
+            };
+            if(u==1){
+              map.removeObject(marker)
+            };
            
             eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
             container2 = new H.map.Group({
@@ -514,7 +523,14 @@ objects: marcadores
             lngBusqueda = item.position.lng;
             coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
             map.setCenter(coordsBusqueda);
-            
+            lat2=item.position.lat;
+            lon2=item.position.lng;
+            coordenadas=item.position.lat+","+item.position.lng;
+            label=item.title;
+            console.log(label);
+            console.log(coordenadas);
+            crearDynamicSheet();
+            //locationId
             /*resultado=JSON.stringify(item)
             console.log("item: "+resultado);
             console.log(item.address.street+", " +item.address.houseNumber+", " 
@@ -533,6 +549,12 @@ objects: marcadores
             map.setCenter(coordsUsu); // centrar el mapa en una coordenada
           
     };
+    function changeTime(){
+      var distanciaparaalarma = $$('#demo-picker-describe').val();
+      console.log(distanciaparaalarma);
+      console.log("entro a la funcion de cambio del picker");
+    };
+    
     function geolocalizacion(){
 
         // onSuccess Callback
@@ -540,71 +562,79 @@ objects: marcadores
         // current GPS coordinates
         //
         
-        var onSuccess = function(position) {
+      var onSuccess = function(position) {
           latUsuario = position.coords.latitude;
           lonUsuario = position.coords.longitude;
           console.log(latUsuario);
           console.log(lonUsuario);
           ubicacionUsuario = latUsuario+","+lonUsuario;
+
           // Initialize the platform object:
-      platform = new H.service.Platform({
-        'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
-      });
+          platform = new H.service.Platform({
+            'apikey': '-iBipIMj1if2vBaXas4CodolHaSqfw_NTWR2C4OAMiU'
+          });
 
-      // Obtain the default map types from the platform object
-      var maptypes = platform.createDefaultLayers();
-      //var layers =  platform.createDefaultLayers();
-      // Instantiate (and display) a map object:
-      map = new H.Map(
-        document.getElementById('mapContainer1'),
-        maptypes.vector.normal.map,
-        //layers.raster.terrain.transit
-        {
-          zoom: 15,
-          center: { lng: lonUsuario, lat: latUsuario }
-        });
-        var svgMarkup = '<svg width="24" height="24" ' +
-          'xmlns="http://www.w3.org/2000/svg">' +
-          '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
-          'height="22" /><text x="12" y="18" font-size="12pt" ' +
-          'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
-          'fill="white">O</text></svg>';
-        var icon = new H.map.Icon(svgMarkup);
-        if (latUsuario!=0 && lonUsuario!=0) {
-          coordsUsu = {lat: latUsuario, lng: lonUsuario};
-          markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
-          map.addObject(markerUsu);
-          map.setCenter(coordsUsu); // centrar el mapa en una coordenada
-        };
-        
-
-      // Enable the event system on the map instance:
-      var mapEvents = new H.mapevents.MapEvents(map);
-      // Instantiate the default behavior, providing the mapEvents object:
-      var behavior = new H.mapevents.Behavior(mapEvents);
-
-      // Get an instance of the geocoding service:
-      var service = platform.getSearchService();
-
-      // Call the geocode method with the geocoding parameters,
-      // the callback and an error callback function (called if a
-      // communication error occurs):
-
-     // Add event listeners:
-      map.addEventListener('longpress', function(evt) {
-          // Log 'tap' and 'mouse' events:
-          console.log(evt.type, evt.currentPointer.type);
+          // Obtain the default map types from the platform object
+          var maptypes = platform.createDefaultLayers();
           
-          coord = map.screenToGeo(evt.currentPointer.viewportX,
-                  evt.currentPointer.viewportY);
+          // Instantiate (and display) a map object:
+          map = new H.Map(
+            document.getElementById('mapContainer1'),
+            maptypes.vector.normal.map,
+            //layers.raster.terrain.transit
+            {
+              zoom: 15,
+              center: { lng: lonUsuario, lat: latUsuario }
+            });
 
-          coordenadas=coord.lat+","+coord.lng;
-          if(u==1){
-            map.removeObject(marker)
-          };
-          if(l==1){
-          map.removeObject(container);
-          };
+            /* LO PASE A LA FUNCION RECALCULAR UBICACION
+            var svgMarkup = '<svg width="24" height="24" ' +
+              'xmlns="http://www.w3.org/2000/svg">' +
+              '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
+              'height="22" /><text x="12" y="18" font-size="12pt" ' +
+              'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+              'fill="white">O</text></svg>';
+            var icon = new H.map.Icon(svgMarkup);
+            if (latUsuario!=0 && lonUsuario!=0) {
+              coordsUsu = {lat: latUsuario, lng: lonUsuario};
+              markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
+              map.addObject(markerUsu);
+              map.setCenter(coordsUsu); // centrar el mapa en una coordenada
+            };
+            */
+
+          // Enable the event system on the map instance:
+          var mapEvents = new H.mapevents.MapEvents(map);
+          // Instantiate the default behavior, providing the mapEvents object:
+          var behavior = new H.mapevents.Behavior(mapEvents);
+
+          // Get an instance of the geocoding service:
+          var service = platform.getSearchService();
+
+          // Call the geocode method with the geocoding parameters,
+          // the callback and an error callback function (called if a
+          // communication error occurs):
+
+         // Add event listeners:
+          map.addEventListener('longpress', function(evt) {
+              // Log 'tap' and 'mouse' events:
+              console.log(evt.type, evt.currentPointer.type);
+              
+              coord = map.screenToGeo(evt.currentPointer.viewportX,
+                      evt.currentPointer.viewportY);
+
+              coordenadas=coord.lat+","+coord.lng;
+              lat2=coord.lat;
+              lon2=coord.lng;
+              if(u==1){
+                map.removeObject(marker)
+              };
+              if(l==1){
+              map.removeObject(container);
+              };
+              if (n==1){
+              container2.removeAll();
+            };
           /*
           var bubble =  new H.ui.InfoBubble(coord, {
                   content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
@@ -612,7 +642,7 @@ objects: marcadores
           
           ui.addBubble(bubble); */
            //addMarker(coord);
-           function reverseGeocode(platform) {
+          function reverseGeocode(platform) {
               var geocoder = platform.getGeocodingService(),
                 parameters = {
                   prox: coordenadas,
@@ -628,7 +658,7 @@ objects: marcadores
                   locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
                   console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
                   label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
-                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                  //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
                   if (g==1){
                     crearDynamicSheet();
                     agregarMarcadorAlCliquear();
@@ -638,6 +668,7 @@ objects: marcadores
                 }
               );
           };
+            
             if (d==1){
             dynamicSheet.close();
             }
@@ -651,45 +682,7 @@ objects: marcadores
 
 
         
-      function crearDynamicSheet(){
-        d=1;
-              dynamicSheet = app.sheet.create({
-                El: ".hojamarcador",
-                backdropEl: ".contenedormapa",
-                swipeToClose: true,
-                swipeToStep: true,
-                 backdrop: true,
-                swipeHandler: ".swipe-handler",
-                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
-                            '<div class="swipe-handler">'+  
-                              '<div class="sheet-modal-inner">'+
-                                
-                                '<div class="sheet-modal-swipe-step">'+
-                                  '<div class="block">'+
-                                    '<h2>'+label+'</h2>'+
-                                    '<div class="row">'+
-                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
-                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
-                                    '</div>'+
-                                    '<p>Tus coordenadas son:</p>'+
-                                    '<p>'+coordenadas+'</p>'+
-                                    '<p>Location Id para rutear:</p>'+
-                                    '<p>'+locationId+'</p>'+
-                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
-                                  '</div>'+
-                                '</div>'+
-                              '</div>'+
-                            '</div>'+
-                          '</div>',
-              });
-              dynamicSheet.open();
-              $$(".crearRuta").on('click',function(){
-                  crearRuta(this.id);
-                  dynamicSheet.close();
-                  map.removeObject(marker);
-              
-          });  
-      };
+      
       function agregarMarcadorAlCliquear(){
             u=1;
             marker = new H.map.Marker(coord);
@@ -742,87 +735,295 @@ objects: marcadores
 
         
     };
+    function crearDynamicSheet(){
+        d=1;
+              dynamicSheet = app.sheet.create({
+                El: ".hojamarcador",
+                backdropEl: ".contenedormapa",
+                swipeToClose: true,
+                swipeToStep: true,
+                 backdrop: true,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+label+'</h2>'+
+                                    '<div class="row">'+
+                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
+                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
+                                    '</div>'+
+                                    '<p>Tus coordenadas son:</p>'+
+                                    '<p>'+coordenadas+'</p>'+
+                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              dynamicSheet.open();
+              $$(".crearRuta").on('click',function(){
+                  crearRuta(this.id);
+                  dynamicSheet.close();
+                  map.removeObject(marker);  
+              });
+              $$(".activarAlarma").on('click',function(){
+                  console.log("hiciste click en activar alarma");
+                  activarAlarma();  
+              });
 
+      };
     function crearRuta(r){
       // Create the parameters for the routing request:
-var routingParameters = {
-  // The routing mode:
-  'mode': 'fastest;car',
-  // The start point of the route:
-  'waypoint0': ubicacionUsuario,
-  // The end point of the route:
-  'waypoint1': r,
-  // To retrieve the shape of the route we choose the route
-  // representation mode 'display'
-  'representation': 'display'
-};
+      var routingParameters = {
+        // The routing mode:
+        'mode': 'fastest;car',
+        // The start point of the route:
+        'waypoint0': ubicacionUsuario,
+        // The end point of the route:
+        'waypoint1': r,
+        // To retrieve the shape of the route we choose the route
+        // representation mode 'display'
+        'representation': 'display'
+      };
 
-// Define a callback function to process the routing response:
-var onResult = function(result) {
-  var route,
-    routeShape,
-    startPoint,
-    endPoint,
-    linestring;
-  if(result.response.route) {
-  // Pick the first route from the response:
-  route = result.response.route[0];
-  // Pick the route's shape:
-  routeShape = route.shape;
+      // Define a callback function to process the routing response:
+      var onResult = function(result) {
+        var route,
+          routeShape,
+          startPoint,
+          endPoint,
+          linestring;
+        if(result.response.route) {
+        // Pick the first route from the response:
+        route = result.response.route[0];
+        // Pick the route's shape:
+        routeShape = route.shape;
 
-  // Create a linestring to use as a point source for the route line
-  linestring = new H.geo.LineString();
+        // Create a linestring to use as a point source for the route line
+        linestring = new H.geo.LineString();
 
-  // Push all the points in the shape into the linestring:
-  routeShape.forEach(function(point) {
-    var parts = point.split(',');
-    linestring.pushLatLngAlt(parts[0], parts[1]);
-  });
+        // Push all the points in the shape into the linestring:
+        routeShape.forEach(function(point) {
+          var parts = point.split(',');
+          linestring.pushLatLngAlt(parts[0], parts[1]);
+        });
 
-  // Retrieve the mapped positions of the requested waypoints:
-  startPoint = route.waypoint[0].mappedPosition;
-  endPoint = route.waypoint[1].mappedPosition;
+        // Retrieve the mapped positions of the requested waypoints:
+        startPoint = route.waypoint[0].mappedPosition;
+        endPoint = route.waypoint[1].mappedPosition;
 
-  // Create a polyline to display the route:
-  var routeLine = new H.map.Polyline(linestring, {
-    style: { strokeColor: 'blue', lineWidth: 3 }
-  });
+        // Create a polyline to display the route:
+        var routeLine = new H.map.Polyline(linestring, {
+          style: { strokeColor: 'blue', lineWidth: 3 }
+        });
 
-  // Create a marker for the start point:
-  var startMarker = new H.map.Marker({
-    lat: startPoint.latitude,
-    lng: startPoint.longitude
-  });
+        // Create a marker for the start point:
+        var startMarker = new H.map.Marker({
+          lat: startPoint.latitude,
+          lng: startPoint.longitude
+        });
 
-  // Create a marker for the end point:
-  var endMarker = new H.map.Marker({
-    lat: endPoint.latitude,
-    lng: endPoint.longitude
-  });
+        // Create a marker for the end point:
+        var endMarker = new H.map.Marker({
+          lat: endPoint.latitude,
+          lng: endPoint.longitude
+        });
 
-  // Add the route polyline and the two markers to the map:
-  map.addObjects([routeLine, startMarker, endMarker]);
+        // Add the route polyline and the two markers to the map:
+        map.addObjects([routeLine, startMarker, endMarker]);
 
-  // Set the map's viewport to make the whole route visible:
-  map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
-  }
-};
+        // Set the map's viewport to make the whole route visible:
+        map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
+        }
+        getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
+       
+      };
 
-// Get an instance of the routing service:
-var router = platform.getRoutingService();
+      // Get an instance of the routing service:
+      var router = platform.getRoutingService();
 
-// Call calculateRoute() with the routing parameters,
-// the callback and an error callback function (called if a
-// communication error occurs):
-router.calculateRoute(routingParameters, onResult,
-  function(error) {
-    alert(error.message);
-  });
-    }
+      // Call calculateRoute() with the routing parameters,
+      // the callback and an error callback function (called if a
+      // communication error occurs):
+      router.calculateRoute(routingParameters, onResult,
+        function(error) {
+          alert(error.message);
+        });
+    };
 
-    
-      
+    function getDistanciaMetros(lat1,lon1,lat2,lon2){
+
+        console.log("entro a getDistanciaMetros")
+        rad = function(x) {return x*Math.PI/180;}
+        var R = 6378.137; //Radio de la tierra en km 
+        var dLat = rad( lat2 - lat1 );
+        var dLong = rad( lon2 - lon1 );
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(rad(lat1)) * 
+        Math.cos(rad(lat2)) * Math.sin(dLong/2) * Math.sin(dLong/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        //aquí obtienes la distancia en metros por la conversion 1Km =1000m
+        var distancia = R * c * 1000; 
+        //return distancia ;
+        //console.log(distancia); 
+      };
+
+    function recalculaPosicion(){
+        var onSuccess = function(position) {
+          latUsuario = position.coords.latitude;
+          lonUsuario = position.coords.longitude;
+          console.log(latUsuario);
+          console.log(lonUsuario);
+          ubicacionUsuario = latUsuario+","+lonUsuario;
+          };
      
+        // onError Callback receives a PositionError object
+        //
+        function onError(error) {
+            alert('code: '    + error.code    + '\n' +
+                  'message: ' + error.message + '\n');
+        };
+     
+        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
+        var svgMarkup = '<svg width="42" height="42" ' +
+              'xmlns="http://www.w3.org/2000/svg">' +
+              '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
+              'height="22" /><text x="12" y="18" font-size="12pt" ' +
+              'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+              'fill="white">O</text></svg>';
+        var icon = new H.map.Icon(svgMarkup);
+        if (latUsuario!=0 && lonUsuario!=0) {
+          coordsUsu = {lat: latUsuario, lng: lonUsuario};
+          markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
+          map.addObject(markerUsu);
+           // centrar el mapa en una coordenada
+          //console.log("estas en: "+coordsUsu)
+        };
+
+        
+
+        //activo alarma
+        //VAR alarma variable bandera para activar/desactivar alarma
+        //VAR geocerca contiene la distancia en metros de la alarma
+        if (alarma==1){
+          //MIDO DISTANCIA A DESTINO. lat2 y lon2 son las coordenadas marcadas como destino de ruta
+          getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
+          if(distancia <= geocerca){
+            //NOTIFICACION
+          }
+        }
+
+    };
+      function activarAlarma(){
+        console.log("entro a la funcion de activar alarma");
+        sheetAlarmas = app.sheet.create({
+                El: ".hojaalarmas",
+                swipeToClose: true,
+                swipeToStep: true,
+                backdrop: true,
+                swipeHandler: ".swipe-handler",
+                content:  
+                       '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:1">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                '<div class="sheet-modal-swipe-step">'+ 
+                                '<div class="block">'+
+                                '<h2>Activa tus alarmas</h2>'+
+                                  '<div class="list inset">'+
+                                        '<ul>'+
+                                          
+                                          
+                                          '<li>'+
+                                            '<div class="item-content">'+
+                                              '<div class="item-media"><i class="icon icon-f7"></i></div>'+
+                                              '<div class="item-inner">'+
+                                                '<input type="text"  placeholder="Describe yourself" readonly="readonly" id="demo-picker-describe"/>'+
+                                                '<div class="item-after">'+
+                                                  '<label class="toggle toggle-init">'+
+                                                    '<input type="checkbox"/>'+
+                                                    '<span class="toggle-icon"></span>'+
+                                                  '</label>'+
+                                                '</div>'+
+                                              '</div>'+
+                                            '</div>'+
+                                          '</li>'+
+                                        '</ul>'+
+                                        '<div class="block-footer">'+
+                                          '<p>Here comes some useful information about list above</p>'+
+                                        '</div>'+
+                                      '</div>'+
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+
+
+              });
+              sheetAlarmas.open();
+              var pickerDescribe = app.picker.create({
+                toolbarCloseText: false,
+                sheetSwipeToClose:true,
+                inputEl: '#demo-picker-describe',
+                  rotateEffect: false,
+                  cols: [
+                    {
+                      textAlign: 'left',
+                      values: ('5 10 15 20 30 40 50 60 100 200 300 400 500').split(' ')
+                    },
+                    {
+                      values: ('Metros Kilometros').split(' ')
+                    },
+                  ]
+              });
+      
+      };
+      //la funcion recalculaPosicion es la que tomará la posicion actual del GPS y hará el cálculo
+      function crearSheetAlarmas(){
+        sheetAlarmas = app.sheet.create({
+                El: ".hojaalarmas",
+                swipeToClose: true,
+                swipeToStep: true,
+                backdrop: true,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:1">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+ALARMAS+'</h2>'+
+                                    '<div class="row">'+
+                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
+                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
+                                    '</div>'+
+                                    '<p>Tus coordenadas son:</p>'+
+                                    '<p>'+coordenadas+'</p>'+
+                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              sheetAlarmas.open();
+      }
+     
+     function crearPickerAlarmas(){
+      var pickerDevice = app.picker.create({
+          inputEl: '#demo-picker-device',
+          cols: [
+            {
+              textAlign: 'center',
+              values: ['iPhone 4', 'iPhone 4S', 'iPhone 5', 'iPhone 5S', 'iPhone 6', 'iPhone 6 Plus', 'iPad 2', 'iPad Retina', 'iPad Air', 'iPad mini', 'iPad mini 2', 'iPad mini 3']
+            }
+          ]
+        });
+      }
 
       function crearPopoverResultados(){
 
