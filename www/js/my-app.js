@@ -85,7 +85,10 @@ var g=0;
 var lat2;
 var lon2;
 //variables para alarmas
-
+var distancia; //variable que se define al hacer un longpress en pantalla
+var alarma = 1; //variable para activar y desactivar alarma
+var distanciaAlarma=200;//variable que deberia definirse desde el picker
+var metrosOkilometros;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
    
@@ -114,7 +117,10 @@ $$(document).on('deviceready', function() {
     
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
-    $$(".Ubicame").on('click', ubicame); 
+    $$(".Ubicame").on('click', function(){
+      console.log(distanciaAlarma);
+      ubicame();
+    }); 
 
 
     var panel = app.panel.create({
@@ -867,9 +873,9 @@ objects: marcadores
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         //aquí obtienes la distancia en metros por la conversion 1Km =1000m
-        var distancia = R * c * 1000; 
+        distancia = R * c * 1000; 
         //return distancia ;
-        //console.log(distancia); 
+        console.log(distancia); 
       };
 
     function recalculaPosicion(){
@@ -913,8 +919,15 @@ objects: marcadores
         if (alarma==1){
           //MIDO DISTANCIA A DESTINO. lat2 y lon2 son las coordenadas marcadas como destino de ruta
           getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
-          if(distancia <= geocerca){
+          if(distancia <= distanciaAlarma){
+            var pasado = distanciaAlarma - distancia;
+            console.log("ya llegas. tu alarma se activo hace:"+pasado);
+            console.log("estas a "+distancia+" de tu destino")
             //NOTIFICACION
+          }else{
+            var faltaTanto = distancia - distanciaAlarma;
+            console.log("falta "+faltaTanto+" para que se active la alarma");
+            console.log("estas a "+distancia+" de tu destino");
           }
         }
 
@@ -942,7 +955,7 @@ objects: marcadores
                                             '<div class="item-content">'+
                                               '<div class="item-media"><i class="icon icon-f7"></i></div>'+
                                               '<div class="item-inner">'+
-                                                '<input type="text"  placeholder="Describe yourself" readonly="readonly" id="demo-picker-describe"/>'+
+                                                '<input type="text"  placeholder="Elija la distancia" readonly="readonly" id="demo-picker-describe"/>'+
                                                 '<div class="item-after">'+
                                                   '<label class="toggle toggle-init">'+
                                                     '<input type="checkbox"/>'+
@@ -967,10 +980,17 @@ objects: marcadores
               });
               sheetAlarmas.open();
               var pickerDescribe = app.picker.create({
-                toolbarCloseText: false,
-                sheetSwipeToClose:true,
-                inputEl: '#demo-picker-describe',
+                  toolbarCloseText: false,
+                  sheetSwipeToClose:true,
+                  inputEl: '#demo-picker-describe',
                   rotateEffect: false,
+                  onChange: function (pickerDescribe,values,displayValues) {
+                     distanciaAlarma= values[0];
+                      metrosOkilometros = values[1];
+                      console.log(distanciaAlarma);
+                      console.log(metrosOkilometros);
+                     
+                  },
                   cols: [
                     {
                       textAlign: 'left',
@@ -979,10 +999,13 @@ objects: marcadores
                     {
                       values: ('Metros Kilometros').split(' ')
                     },
-                  ]
+                  ],
+                  
+
               });
       
       };
+      
       //la funcion recalculaPosicion es la que tomará la posicion actual del GPS y hará el cálculo
       function crearSheetAlarmas(){
         sheetAlarmas = app.sheet.create({
