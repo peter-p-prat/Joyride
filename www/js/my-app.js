@@ -6,7 +6,7 @@ var app = new Framework7({
     // App root element
     root: '#app',
     // App Name
-    name: 'My App',
+    name: 'Joyride',
     // App id
     id: 'com.myapp.test',
     // Enable swipe panel
@@ -41,7 +41,8 @@ var storage = window.localStorage;
 var usuario = { "email": "", "clave": "" };
 var usuarioLocal, claveLocal;
 var consultaLocal;
-
+// variables para firebase
+var nombreFavorito="";
 //variables para gps
 
 var latUsuario, lonUsuario;
@@ -70,14 +71,17 @@ var marcador11;
 var marcador12;
 var l=0;
 var n=0;
+//variables para ruta
+var routeLine, startMarker, endMarker;
 //variables para interaccion con mapa
+var e=0;//variable bandera dynamicSheet Favorito
 var ubicacionUsuario;
 var coord;
 var dynamicSheet;
 var coordenadas;
 var label;
 var locationId;
-var d=0;
+var d=0;//variable bandera dynamicSheet Favorito
 var marker;
 var u=0;
 var g=0;
@@ -115,16 +119,18 @@ $$(document).on('deviceready', function() {
         fnIniciarDatos();
     }
     
+    $$("#user").on('click', fnConsultarFavorito);
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
     $$(".Ubicame").on('click', function(){
       console.log(distanciaAlarma);
       ubicame();
     }); 
-
+    
 
     var panel = app.panel.create({
           el: '.panel-registro',
+          swipeOnlyClose: true,
           on: {
                 opened: function () {
                   console.log('Panel opened')
@@ -162,6 +168,7 @@ $$(document).on('page:init', function (e) {
     db = firebase.firestore();
     refUsuarios = db.collection("USUARIOS");
     refTiposUsuarios= db.collection("TIPOS_USUARIOS");
+    refFavoritos=db.collection("LUGARES_FAVORITOS");
 
 
 
@@ -231,6 +238,204 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
         });
       
     };
+    function fnGuardarFavorito(n) {
+      console.log("hello World");
+      console.log(correo);
+      console.log(n);
+      var data = {
+          user: correo,
+          id: locationId,
+          label: label,
+          coordenadas: coordenadas,
+          nombre: n,
+        }
+        refFavoritos.add(data);
+      
+    }
+     function fnConsultarFavorito(){
+
+      $$("#listaFavoritos").empty();
+      refFavoritos.where("user","==",correo).get()
+        .then(function(querySnapshot){
+          querySnapshot.forEach(function(doc){
+            console.log("data: "+doc.data().nombre);
+            
+            console.log("data: "+doc.data().label);
+            
+            console.log("data: "+doc.data().coordenadas);
+            
+            console.log("data: "+doc.data().id);
+            console.log(doc.id);
+
+            
+            
+            $$("#listaFavoritos").append('<div class="list accordion-list '+doc.id+'">'+
+                                            '<ul>'+
+                                              '<li class="accordion-item"><a href="#" class="item-content item-link">'+
+                                                '<div class="item-inner">'+
+                                                  '<div class="item-title">'+doc.data().nombre+'</div>'+
+                                                '</div></a>'+
+                                                '<div class="accordion-item-content">'+
+                                                  '<div class="block">'+
+                                                    '<div class="list links-list">'+
+                                                      '<ul class="listaFavoritos">'+
+                                                        '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">Abrir</a></li>'+
+                                                        '<li class="eliminarFavorito" id="'+doc.id+'"><a href="#">Eliminar</a></li>' +
+                                                      '</ul>'+
+                                                    '</div>'+
+                                                  '</div>'+
+                                                '</div>'+
+                                              '</li>'+
+                                            '</ul>'+
+                                          '</div>');
+
+            $$(".unFavorito").on('click',function(){
+                  console.log("hiciste click en un favorito");
+                  abrirFavorito(this.id);
+                  obtieneNombreFavorito(this.value);
+                  //app.popover.close(".popoverResultados",true);   
+            });
+            $$(".eliminarFavorito").on('click', function(){
+              eliminarFavorito(this.id);
+              $$("."+this.id).remove();
+            })
+          })
+        })
+    };
+    function eliminarFavorito(docId){
+      refFavoritos.doc(docId).delete();
+    }
+    //ESTE ES EL CONTENIDO QUE HAY QUE PONER EN EN APPEND PARA PODER BORRAR LOS FAVORITOS
+    function paraLaburarElAppend(){
+                                '<div class="list accordion-list '+doc.id+'">'+
+                                  '<ul>'+
+                                    '<li class="accordion-item"><a href="#" class="item-content item-link">'+
+                                      '<div class="item-inner">'+
+                                        '<div class="item-title">favorito 1</div>'+
+                                      '</div></a>'+
+                                      '<div class="accordion-item-content">'+
+                                        '<div class="block">'+
+                                          '<div class="list links-list">'+
+                                            '<ul class="listaFavoritos">'+
+                                              '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">Abrir</a></li>'+
+                                              '<li class="eliminarFavorito" id="'+doc.id+'"><a href="#">Eliminar</a></li>' +
+                                            '</ul>'+
+                                          '</div>'+
+                                        '</div>'+
+                                      '</div>'+
+                                    '</li>'+
+                                  '</ul>'+
+                                '</div>'
+
+
+                                '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">'+doc.data().nombre+'</a></li>'
+    }
+    function obtieneNombreFavorito(nombre){
+      nombreFavorito=nombre;
+    };
+    function abrirFavorito(lascoordenadas){
+      console.log("entro a abrirFavorito y las coords son: "+lascoordenadas);
+
+      function reverseGeocode(platform) {
+        console.log("entro a reversegeocode");
+              var geocoder = platform.getGeocodingService(),
+                parameters = {
+                  prox: lascoordenadas+",57",
+                  mode: 'retrieveAddresses',
+                  maxresults: '1',
+                  gen: '9'};
+
+              geocoder.reverseGeocode(parameters,
+                function (result) {
+                  g=1;
+                  console.log("aca estamos");
+                  console.log(JSON.stringify(result));
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                  locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                  console.log("locationId"+locationId)
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                  label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                  lat2=JSON.stringify(result.Response.View[0].Result[0].Location.DisplayPosition.Latitude);
+                  lon2=JSON.stringify(result.Response.View[0].Result[0].Location.DisplayPosition.Longitude);
+                  console.log("lat2="+lat2);
+                  console.log("lon2="+lon2);
+                  coordenadas=lat2+","+lon2;
+                  coordsBusqueda = {lat: lat2, lng: lon2};
+                  console.log("coordenadas="+coordenadas)
+                  
+                  //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                  if (g==1){
+                      if (d==1){
+                      dynamicSheet.close();
+                      };
+                      if (e==1){
+                        dynamicSheet2.close();
+                      }
+                      crearDynamicSheet2();
+                      if (u==1){
+                        map.removeObject(marker);
+                      }
+                      u=1;
+                      marker = new H.map.Marker(new H.geo.Point(lat2, lon2));
+                      map.addObject(marker);
+                      map.setCenter(coordsBusqueda);
+                      app.panel.close(".panel-user", true)
+                  };
+                }, function (error) {
+                  alert(error);
+                }
+              );
+          };
+          reverseGeocode(platform)
+            /*
+            if (d==1){
+            dynamicSheet.close();
+            }*/
+    }
+
+    function crearDynamicSheet2(){
+        e=1;
+              dynamicSheet2 = app.sheet.create({
+                El: ".hojafavorito",
+                backdropEl: ".contenedormapa",
+                swipeToClose: true,
+                swipeToStep: true,
+                 backdrop: true,
+                 closeByOutsideClick:true,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+label+'</h2>'+
+                                    '<div class="row">'+
+                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
+                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
+                                    '</div>'+
+                                    '<p>Tus coordenadas son:</p>'+
+                                    '<p>'+coordenadas+'</p>'+
+                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              dynamicSheet2.open();
+              $$(".crearRuta").on('click',function(){
+                  crearRuta(this.id);
+                  dynamicSheet2.close();
+                  map.removeObject(marker);  
+              });
+              $$(".activarAlarma").on('click',function(){
+                  console.log("hiciste click en activar alarma");
+                  activarAlarma();  
+              });
+              
+
+      };
     function fnIniciarDatos() {
 
         codido = "VIS"; tipo = "Visitantes"; saludo = "Hola Visitante";
@@ -552,7 +757,7 @@ objects: marcadores
       //se ejecuta solo cuando hago click en el boton del index
       
             
-            map.setCenter(coordsUsu); // centrar el mapa en una coordenada
+    map.setCenter(coordsUsu); // centrar el mapa en una coordenada
           
     };
     function changeTime(){
@@ -648,10 +853,11 @@ objects: marcadores
           
           ui.addBubble(bubble); */
            //addMarker(coord);
+          
           function reverseGeocode(platform) {
               var geocoder = platform.getGeocodingService(),
                 parameters = {
-                  prox: coordenadas,
+                  prox: coordenadas+",57",
                   mode: 'retrieveAddresses',
                   maxresults: '1',
                   gen: '9'};
@@ -662,6 +868,7 @@ objects: marcadores
                   console.log("aca estamos");
                   console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
                   locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                  console.log("locationId"+locationId)
                   console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
                   label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
                   //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
@@ -703,14 +910,14 @@ objects: marcadores
         // Crea interfaz de usuario (zoom, capas y barra de escala)
       var ui = H.ui.UI.createDefault(map, maptypes, "es-ES");
       
-      /*  PARA SETEAR UBICACION DE COMANDOS
+      //  PARA SETEAR UBICACION DE COMANDOS
       var mapSettings = ui.getControl('mapsettings');
       var zoom = ui.getControl('zoom');
       var scalebar = ui.getControl('scalebar');
-      mapSettings.setAlignment('bottom-right');
-      zoom.setAlignment('bottom-right');
-      scalebar.setAlignment('bottom-right');
-      */
+      mapSettings.setAlignment('top-right');
+      zoom.setAlignment('top-right');
+      scalebar.setAlignment('top-right');
+      
             /*alert('Latitude: '          + position.coords.latitude          + '\n' +
                   'Longitude: '         + position.coords.longitude         + '\n' +
                   'Altitude: '          + position.coords.altitude          + '\n' +
@@ -749,6 +956,7 @@ objects: marcadores
                 swipeToClose: true,
                 swipeToStep: true,
                  backdrop: true,
+                 closeByOutsideClick:true,
                 swipeHandler: ".swipe-handler",
                 content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
                             '<div class="swipe-handler">'+  
@@ -760,6 +968,11 @@ objects: marcadores
                                     '<div class="row">'+
                                       '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
                                       '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
+                                    '</div>'+
+                                     '<div class="row">'+
+                                      '<div class="col-33"></div>'+
+                                      '<div class="col-33 GuardarFavorito open-prompt boton button button-round button-fill style="height:10vh; width:10vh; border-radius:50">GUARDAR</div>'+
+                                      '<div class="col-33"></div>'+
                                     '</div>'+
                                     '<p>Tus coordenadas son:</p>'+
                                     '<p>'+coordenadas+'</p>'+
@@ -779,6 +992,20 @@ objects: marcadores
               $$(".activarAlarma").on('click',function(){
                   console.log("hiciste click en activar alarma");
                   activarAlarma();  
+              });
+              $$(".GuardarFavorito").on('click',function(){
+                  console.log(locationId);
+                  console.log(label);
+                  console.log(coordenadas);
+                  //fnGuardarFavorito();
+                  $$('.open-prompt').on('click', function () {
+                    app.dialog.prompt('Agregue un nombre para guardar este sitio', function (name) {
+                        fnGuardarFavorito(name);
+                        app.dialog.alert('Listo,' + name+ 'ha sido guardado');
+                        //nombreFavorito = name;
+                        //console.log(name);
+                    });
+                  });  
               });
 
       };
@@ -823,18 +1050,18 @@ objects: marcadores
         endPoint = route.waypoint[1].mappedPosition;
 
         // Create a polyline to display the route:
-        var routeLine = new H.map.Polyline(linestring, {
+        routeLine = new H.map.Polyline(linestring, {
           style: { strokeColor: 'blue', lineWidth: 3 }
         });
 
         // Create a marker for the start point:
-        var startMarker = new H.map.Marker({
+        startMarker = new H.map.Marker({
           lat: startPoint.latitude,
           lng: startPoint.longitude
         });
 
         // Create a marker for the end point:
-        var endMarker = new H.map.Marker({
+        endMarker = new H.map.Marker({
           lat: endPoint.latitude,
           lng: endPoint.longitude
         });
@@ -851,7 +1078,16 @@ objects: marcadores
 
       // Get an instance of the routing service:
       var router = platform.getRoutingService();
+      $$(".page").append('<div class="cancelarRuta fab fab-left-bottom color-yellow">'+
+        '<a href="#">'+
+          
+          '<i class="icon  f7-icons if-not-md">xmark</i>'+
+          
+          '<i class="icon cancelarRuta material-icons md-only">close</i>'+
+        '</a>'+
 
+      '</div>');
+      $$(".cancelarRuta").on('click', cancelarRuta);
       // Call calculateRoute() with the routing parameters,
       // the callback and an error callback function (called if a
       // communication error occurs):
@@ -860,7 +1096,11 @@ objects: marcadores
           alert(error.message);
         });
     };
-
+    function cancelarRuta(){
+      map.removeObjects([routeLine, startMarker, endMarker]);
+      console.log("entro a cancelar ruta")
+      $$(".cancelarRuta").remove();
+    };
     function getDistanciaMetros(lat1,lon1,lat2,lon2){
 
         console.log("entro a getDistanciaMetros")
@@ -941,7 +1181,7 @@ objects: marcadores
                 backdrop: true,
                 swipeHandler: ".swipe-handler",
                 content:  
-                       '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:1">'+
+                       '<div class="sheet-modal my-sheet-swipe-to-close" style="height:80vh; --f7-sheet-bg-color: #fff; opacity:1">'+
                             '<div class="swipe-handler">'+  
                               '<div class="sheet-modal-inner">'+
                                 '<div class="sheet-modal-swipe-step">'+ 

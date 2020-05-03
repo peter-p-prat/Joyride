@@ -22,7 +22,11 @@
 .crearRuta{
 	z-index: 2;
 };
-
+.GuardarFavorito{
+	height: 20vh;
+	width: 10vh;
+	border-radius: 50;
+}
 .hojamarcador{
 	opacity: 0.5;
 }

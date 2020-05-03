@@ -75,9 +75,8 @@
                 <div class="navbar">
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
-                        <a id="user" data-panel=".panel-login" class="panel-open">LOGIN Y REGISTRO</a>
+                        <a id="user" data-panel=".panel-login" class="panel-open">LOGIN</a>
                         
-                        <a class="botonprueba" href="/mapa/" >mapa</a>
                         
                     </div>
                 </div>
@@ -167,7 +166,26 @@
                 <div id="panelUser" class="panel panel-left panel-cover panel-user">
                   <div class="block">
                     <h4 id="nombreUsuario"></h4>
-                            
+                    
+                    
+                      <div class="list accordion-list consultarFavoritos">
+                        <ul>
+                          <li class="accordion-item "><a href="#" class="item-content item-link">
+                              <div class="item-inner">
+                                <div class="item-title consultarFavoritos">Favoritos</div>
+                              </div></a>
+                            <div class="accordion-item-content">
+                              <div id="listaFavoritos" class="block ">
+                                
+                                
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+
+
+
                   </div>
                 </div>
 
@@ -189,15 +207,19 @@
                   <div class="popover-resultados"></div>
 
                   <div class="contenedormapa block block-strong text-align-center">
-                    <div style="width: 100vw; height: 80vh" id="mapContainer1"><div id="consultarBd" class="boton button button-round button-fill" style="opacity:0.85">Consultar Base de Datos</div></div>
+                    <div style="width: 100vw; height: 82.5vh" id="mapContainer1">
                     
                   </div>
-                  <div class="row no-gap">
-                      <!-- Each "cell" has col-[width in percents] class -->
-                      <div class="col-50 guardarBd boton button button-round button-fill" style="opacity:0.85">Guardar en Base de Datos</div>
-                      <div class="col-50 Ubicame ac-4 boton button button-round button-fill" style="opacity:0.85">Mi ubicacion</div>
-                  </div>
                   
+                  <!-- FAB Left Top (Yellow) -->
+                  <div class="fab Ubicame fab-right-bottom color-blue">
+                    <a href="#">
+                      
+                      <i class="f7-icons size-22">location</i>
+                      
+                    </a>
+                    
+                  </div>
                   <!--   
                   <div class="block">
                     <h3 >Contenido del Index</h3>
