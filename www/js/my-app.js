@@ -74,6 +74,8 @@ var n=0;
 //variables para ruta
 var routeLine, startMarker, endMarker;
 //variables para interaccion con mapa
+var m=0;
+var n=0;
 var e=0;//variable bandera dynamicSheet Favorito
 var ubicacionUsuario;
 var coord;
@@ -90,9 +92,13 @@ var lat2;
 var lon2;
 //variables para alarmas
 var distancia; //variable que se define al hacer un longpress en pantalla
-var alarma = 1; //variable para activar y desactivar alarma
-var distanciaAlarma=200;//variable que deberia definirse desde el picker
+var alarma = 0; //variable para activar y desactivar alarma
+var distanciaAlarma=0;//variable que deberia definirse desde el picker
 var metrosOkilometros;
+var latAlarma1;
+var lonAlarma1;
+var distanciaAlarmaParaMostrar;
+var metrosOkilometrosParaMostrar;
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
    
@@ -108,7 +114,7 @@ $$(document).on('deviceready', function() {
     })
 
     geolocalizacion();
-    //setInterval(recalculaPosicion,3000);
+    setInterval(recalculaPosicion,3000);
     consultarLocalStorage();
     
     
@@ -126,7 +132,9 @@ $$(document).on('deviceready', function() {
       console.log(distanciaAlarma);
       ubicame();
     }); 
-    
+    $$('.cerrarPicker').on('click', function(){
+      pickerDescribe.close();
+    })
 
     var panel = app.panel.create({
           el: '.panel-registro',
@@ -702,6 +710,7 @@ objects: marcadores
         console.log("entró a la funcion de definicion de resultado");
       if (n==1){
           container2.removeAll();
+          map.removeObject(container2);
           console.log("tendria que borrar"+n);
         }
        // map.removeObjets(map.getObjets ());
@@ -741,6 +750,7 @@ objects: marcadores
             console.log(label);
             console.log(coordenadas);
             crearDynamicSheet();
+            getDistanciaMetros(latUsuario, lonUsuario, lat2, lon2);
             //locationId
             /*resultado=JSON.stringify(item)
             console.log("item: "+resultado);
@@ -835,10 +845,11 @@ objects: marcadores
                       evt.currentPointer.viewportY);
 
               coordenadas=coord.lat+","+coord.lng;
+
               lat2=coord.lat;
               lon2=coord.lng;
-              if(u==1){
-                map.removeObject(marker)
+              if (u==1){
+                map.removeObject(marker);
               };
               if(l==1){
               map.removeObject(container);
@@ -846,6 +857,11 @@ objects: marcadores
               if (n==1){
               container2.removeAll();
             };
+            if (e==1){
+              dynamicSheet2.close();
+            };
+            console.log("coord"+coord);
+            console.log("coordenadas"+coordenadas);
           /*
           var bubble =  new H.ui.InfoBubble(coord, {
                   content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
@@ -853,7 +869,7 @@ objects: marcadores
           
           ui.addBubble(bubble); */
            //addMarker(coord);
-          
+            
           function reverseGeocode(platform) {
               var geocoder = platform.getGeocodingService(),
                 parameters = {
@@ -1095,6 +1111,7 @@ objects: marcadores
         function(error) {
           alert(error.message);
         });
+
     };
     function cancelarRuta(){
       map.removeObjects([routeLine, startMarker, endMarker]);
@@ -1122,8 +1139,8 @@ objects: marcadores
         var onSuccess = function(position) {
           latUsuario = position.coords.latitude;
           lonUsuario = position.coords.longitude;
-          console.log(latUsuario);
-          console.log(lonUsuario);
+          //console.log(latUsuario);
+          //console.log(lonUsuario);
           ubicacionUsuario = latUsuario+","+lonUsuario;
           };
      
@@ -1143,14 +1160,46 @@ objects: marcadores
               'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
               'fill="white">O</text></svg>';
         var icon = new H.map.Icon(svgMarkup);
-        if (latUsuario!=0 && lonUsuario!=0) {
-          coordsUsu = {lat: latUsuario, lng: lonUsuario};
-          markerUsu = new H.map.Marker(coordsUsu , { icon: icon });
-          map.addObject(markerUsu);
-           // centrar el mapa en una coordenada
-          //console.log("estas en: "+coordsUsu)
+        var marcadorUsuario = new H.map.Icon("https://image.flaticon.com/icons/png/512/1783/1783356.png", {size: {w: 25, h: 25}});
+        if (m==0){
+          if (latUsuario!=0 && lonUsuario!=0) {
+            coordsUsu = {lat: latUsuario, lng: lonUsuario};
+            markerUsu = new H.map.Marker(coordsUsu , { icon: marcadorUsuario });
+            map.addObject(markerUsu);
+            m=1;
+             // centrar el mapa en una coordenada
+            //console.log("estas en: "+coordsUsu)
+          };
+        };
+        if (m==1){
+          markerUsu.setPosition( coordsUsu );
         };
 
+        var toggle = app.toggle.create({
+          el: '.toggleAlarma1',
+          on: {
+            change: function () {
+              console.log('Toggle changed');
+              if (toggle.checked) {
+                console.log("toggle checked"+distanciaAlarma);
+                alarma=1;
+                latAlarma1=lat2;
+                lonAlarma1=lon2;
+                app.dialog.alert('Te avisaremos cuando estes a '+distanciaAlarmaParaMostrar+" "+ "<font style='text-transform: lowercase;''>"+metrosOkilometrosParaMostrar+"</font>" ,"¡Listo!")
+                if (metrosOkilometros=="Kilometros"){
+                  distanciaAlarma=distanciaAlarma*1000;
+                  
+                }
+              }else{
+                alarma=0;
+                $$(".cancelarAlarma").remove();
+                app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+              };
+            }
+          }
+        })
+
+        
         
 
         //activo alarma
@@ -1158,16 +1207,30 @@ objects: marcadores
         //VAR geocerca contiene la distancia en metros de la alarma
         if (alarma==1){
           //MIDO DISTANCIA A DESTINO. lat2 y lon2 son las coordenadas marcadas como destino de ruta
-          getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
+          getDistanciaMetros(latUsuario,lonUsuario,latAlarma1,lonAlarma1);
+          $$(".page").append('<div class="cancelarAlarma fab fab-extended fab-center-bottom color-red">'+
+            '<a href="#">'+
+              
+              '<i class="icon  f7-icons if-not-md">xmark</i>'+
+              '<i class="icon cancelarRuta material-icons md-only">close</i>'+
+              '<div class="fab-text">Cancelar Alarma</div>'+
+            '</a>'+
+
+          '</div>');
+          $$(".cancelarAlarma").on('click', function(){
+            alarma=0;
+            $$(".cancelarAlarma").remove();
+            app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+          });
           if(distancia <= distanciaAlarma){
             var pasado = distanciaAlarma - distancia;
-            console.log("ya llegas. tu alarma se activo hace:"+pasado);
-            console.log("estas a "+distancia+" de tu destino")
+            console.log("ya llegas. tu alarma se activo hace:"+pasado+" metros");
+            console.log("estas a "+distancia+" metros de tu destino")
             //NOTIFICACION
           }else{
             var faltaTanto = distancia - distanciaAlarma;
-            console.log("falta "+faltaTanto+" para que se active la alarma");
-            console.log("estas a "+distancia+" de tu destino");
+            console.log("falta "+faltaTanto+" metros para que se active la alarma");
+            console.log("estas a "+distancia+" metros de tu destino");
           }
         }
 
@@ -1177,8 +1240,10 @@ objects: marcadores
         sheetAlarmas = app.sheet.create({
                 El: ".hojaalarmas",
                 swipeToClose: true,
-                swipeToStep: true,
+                //swipeToStep: true,
                 backdrop: true,
+                push:true,
+                closeByOutsideClick: false,
                 swipeHandler: ".swipe-handler",
                 content:  
                        '<div class="sheet-modal my-sheet-swipe-to-close" style="height:80vh; --f7-sheet-bg-color: #fff; opacity:1">'+
@@ -1187,28 +1252,32 @@ objects: marcadores
                                 '<div class="sheet-modal-swipe-step">'+ 
                                 '<div class="block">'+
                                 '<h2>Activa tus alarmas</h2>'+
-                                  '<div class="list inset">'+
+                                '<div class="block-footer class="no-margin-bottom"">'+
+                                  '<p class="no-margin-bottom">Selecciona a qué distancia de tu destino querés recibir tus avisos y activalas deslizando el interruptor</p>'+
+                                '</div>'+
+                                  '<div class="no-margin-top no-padding-top list simple-list ">'+
+                                        '<p class="text-align-center margin-bottom-half no-padding">ALARMA 1</p>'+
                                         '<ul>'+
-                                          
-                                          
                                           '<li>'+
                                             '<div class="item-content">'+
                                               '<div class="item-media"><i class="icon icon-f7"></i></div>'+
                                               '<div class="item-inner">'+
                                                 '<input type="text"  placeholder="Elija la distancia" readonly="readonly" id="demo-picker-describe"/>'+
                                                 '<div class="item-after">'+
-                                                  '<label class="toggle toggle-init">'+
+                                                  '<label class="toggleAlarma1 toggle toggle-init disabled">'+
                                                     '<input type="checkbox"/>'+
                                                     '<span class="toggle-icon"></span>'+
                                                   '</label>'+
                                                 '</div>'+
                                               '</div>'+
                                             '</div>'+
+                                            
                                           '</li>'+
+                                          
                                         '</ul>'+
-                                        '<div class="block-footer">'+
-                                          '<p>Here comes some useful information about list above</p>'+
-                                        '</div>'+
+                                        '<div >'+
+                                              '<p class="block-footer">Antes de activar la alarma verificá nuevamente la distancia seleccionada</p>'+
+                                            '</div>'+
                                       '</div>'+
                                   '</div>'+
                                 '</div>'+
@@ -1219,18 +1288,24 @@ objects: marcadores
 
               });
               sheetAlarmas.open();
+              
               var pickerDescribe = app.picker.create({
-                  toolbarCloseText: false,
+                  toolbar: true,
+                  push:true,
+                  backdrop:true,
+                  toolbarCloseText: 'Desliza hacia abajo para cerrar',
                   sheetSwipeToClose:true,
                   inputEl: '#demo-picker-describe',
                   rotateEffect: false,
+                  closeByOutsideClick: true,
+                  /*onClose: function(pickerDescribe){console.log("picker cerrado") },
                   onChange: function (pickerDescribe,values,displayValues) {
                      distanciaAlarma= values[0];
                       metrosOkilometros = values[1];
                       console.log(distanciaAlarma);
                       console.log(metrosOkilometros);
                      
-                  },
+                  },*/
                   cols: [
                     {
                       textAlign: 'left',
@@ -1240,7 +1315,23 @@ objects: marcadores
                       values: ('Metros Kilometros').split(' ')
                     },
                   ],
-                  
+                  on: {
+                    change: function (picker, values){
+                      distanciaAlarma = picker.value[0];
+                      metrosOkilometros= picker.value[1];
+                      distanciaAlarmaParaMostrar= picker.value[0];
+                      metrosOkilometrosParaMostrar= picker.value[1];
+                      console.log(distanciaAlarma);
+                      console.log(metrosOkilometros);
+                      if (picker.value[0]!=""){
+                        if ($$(".toggleAlarma1").hasClass('disabled')){
+                          $$(".toggleAlarma1").removeClass('disabled');
+                        };
+                      } else {
+                        $$(".toggleAlarma1").addClass('disabled');
+                      }
+                    }
+                  }
 
               });
       
