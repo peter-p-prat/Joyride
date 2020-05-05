@@ -56,4 +56,9 @@
 	justify-content: center;
 	align-content: center;
 };
-
+.botonfab{
+	width: 100px;
+};
+.botonfab2{
+	width: 80px;
+}

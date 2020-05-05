@@ -73,9 +73,11 @@ var l=0;
 var n=0;
 //variables para ruta
 var routeLine, startMarker, endMarker;
+var ruta=0;
 //variables para interaccion con mapa
 var m=0;
 var n=0;
+var marcadorFavorito = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727584.svg", {size: {w: 50, h: 50}});
 var e=0;//variable bandera dynamicSheet Favorito
 var ubicacionUsuario;
 var coord;
@@ -84,6 +86,9 @@ var coordenadas;
 var label;
 var locationId;
 var d=0;//variable bandera dynamicSheet Favorito
+var f=0;//variable bandera creacion de marcador de favorito
+var marker2;//variable marcador favorito
+var container4;//variable grupo marcador favorito
 var marker;
 var u=0;
 var g=0;
@@ -91,6 +96,13 @@ var g=0;
 var lat2;
 var lon2;
 //variables para alarmas
+var a=0; //variable bandera marcador alarma
+var marcadorAlarma = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727606.svg", {size: {w: 50, h: 50}});
+var coordsAlarma;
+var markerAlarma;
+var fab=0;
+var distanciaParaMostrar;
+var unidad;
 var distancia; //variable que se define al hacer un longpress en pantalla
 var alarma = 0; //variable para activar y desactivar alarma
 var distanciaAlarma=0;//variable que deberia definirse desde el picker
@@ -381,11 +393,19 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
                       }
                       crearDynamicSheet2();
                       if (u==1){
-                        map.removeObject(marker);
-                      }
-                      u=1;
-                      marker = new H.map.Marker(new H.geo.Point(lat2, lon2));
-                      map.addObject(marker);
+                        container3.removeAll();
+                      };
+                      if (f==1){
+                        container4.removeAll();
+                      };
+                      
+                      f=1;
+                      marker2 = new H.map.Marker(new H.geo.Point(lat2, lon2), {icon: marcadorFavorito});
+                      container4 = new H.map.Group({
+                          objects: [marker2]
+                        });
+                      map.addObject(container4);
+
                       map.setCenter(coordsBusqueda);
                       app.panel.close(".panel-user", true)
                   };
@@ -710,54 +730,63 @@ objects: marcadores
         console.log("entró a la funcion de definicion de resultado");
       if (n==1){
           container2.removeAll();
-          map.removeObject(container2);
+          
           console.log("tendria que borrar"+n);
+          n=0;
         }
+
+        if (d==1){
+              dynamicSheet.close();
+            };
+            if(u==1){
+             container3.removeAll();
+            };
+            if (f==1){
+               container4.removeAll();
+            };
        // map.removeObjets(map.getObjets ());
       service.geocode({
         q: query
       }, (result) => {
         console.log("tomó el query");
         
-        n=1;
+        
         // Add a marker for each location found
         result.items.forEach((item) => {
           
-            if (d==1){
-              dynamicSheet.close();
-            };
-            if(u==1){
-              map.removeObject(marker)
-            };
-           
-            eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
-            container2 = new H.map.Group({
-                  objects: [marcador]
-                });
-              map.addObject(container2);
-            console.log("lat: "+item.position.lat);
-            console.log("lng: "+item.position.lng);
-            console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
             
-            latBusqueda = item.position.lat;
-            lngBusqueda = item.position.lng;
-            coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
-            map.setCenter(coordsBusqueda);
-            lat2=item.position.lat;
-            lon2=item.position.lng;
-            coordenadas=item.position.lat+","+item.position.lng;
-            label=item.title;
-            console.log(label);
-            console.log(coordenadas);
-            crearDynamicSheet();
-            getDistanciaMetros(latUsuario, lonUsuario, lat2, lon2);
-            //locationId
-            /*resultado=JSON.stringify(item)
-            console.log("item: "+resultado);
-            console.log(item.address.street+", " +item.address.houseNumber+", " 
-              +item.address.city+", " +item.address.state+", " +item.address.countryName);
-            */
+            if (n==0){ 
+              n=1;
 
+              
+              console.log("lat: "+item.position.lat);
+              console.log("lng: "+item.position.lng);
+              console.log(item.address.street+", " +item.address.houseNumber+", "+item.address.city+", " +item.address.state+", " +item.address.countryName);
+              
+              latBusqueda = item.position.lat;
+              lngBusqueda = item.position.lng;
+              coordsBusqueda = {lat: latBusqueda, lng: lngBusqueda};
+              map.setCenter(coordsBusqueda);
+              lat2=item.position.lat;
+              lon2=item.position.lng;
+              coordenadas=item.position.lat+","+item.position.lng;
+              label=item.title;
+              console.log(label);
+              console.log(coordenadas);
+              crearDynamicSheet();
+              getDistanciaMetros(latUsuario, lonUsuario, lat2, lon2);
+              //locationId
+              /*resultado=JSON.stringify(item)
+              console.log("item: "+resultado);
+              console.log(item.address.street+", " +item.address.houseNumber+", " 
+                +item.address.city+", " +item.address.state+", " +item.address.countryName);
+              */
+              eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+              container2 = new H.map.Group({
+                    objects: [marcador]
+                  });
+                map.addObject(container2);
+            };
           
         });
       }, alert);
@@ -840,7 +869,7 @@ objects: marcadores
           map.addEventListener('longpress', function(evt) {
               // Log 'tap' and 'mouse' events:
               console.log(evt.type, evt.currentPointer.type);
-              
+              console.log(n);
               coord = map.screenToGeo(evt.currentPointer.viewportX,
                       evt.currentPointer.viewportY);
 
@@ -849,17 +878,25 @@ objects: marcadores
               lat2=coord.lat;
               lon2=coord.lng;
               if (u==1){
-                map.removeObject(marker);
+                //map.removeObject(marker);
               };
+              if (u==1){
+                    container3.removeAll();
+                  }; 
               if(l==1){
               map.removeObject(container);
               };
               if (n==1){
-              container2.removeAll();
-            };
+                  container2.removeAll();
+                  
+                  console.log("tendria que borrar"+n);
+                };
             if (e==1){
               dynamicSheet2.close();
             };
+            if (f==1){
+                  container4.removeAll();
+                };
             console.log("coord"+coord);
             console.log("coordenadas"+coordenadas);
           /*
@@ -916,7 +953,14 @@ objects: marcadores
             u=1;
             marker = new H.map.Marker(coord);
           
-          map.addObject(marker);
+            //eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+            container3 = new H.map.Group({
+                  objects: [marker]
+                });
+              map.addObject(container3);
+
+
+          //map.addObject(marker);
           map.setCenter(coord);
       };  
      
@@ -966,6 +1010,7 @@ objects: marcadores
     };
     function crearDynamicSheet(){
         d=1;
+        console.log("entro a createDyamicSheet");
               dynamicSheet = app.sheet.create({
                 El: ".hojamarcador",
                 backdropEl: ".contenedormapa",
@@ -1003,7 +1048,13 @@ objects: marcadores
               $$(".crearRuta").on('click',function(){
                   crearRuta(this.id);
                   dynamicSheet.close();
-                  map.removeObject(marker);  
+                  //map.removeObject(marker); 
+                  if (u==1){
+                    container3.removeAll();
+                  }; 
+                  if (n==1){
+                    container2.removeAll();
+                  }; 
               });
               $$(".activarAlarma").on('click',function(){
                   console.log("hiciste click en activar alarma");
@@ -1026,92 +1077,101 @@ objects: marcadores
 
       };
     function crearRuta(r){
+      console.log(r);
+      if (ruta==1){
+        map.removeObjects([routeLine, startMarker, endMarker]);
+        console.log("entro a cancelar ruta")
+        $$(".cancelarRuta").remove();
+        ruta=0;
+      }
       // Create the parameters for the routing request:
-      var routingParameters = {
-        // The routing mode:
-        'mode': 'fastest;car',
-        // The start point of the route:
-        'waypoint0': ubicacionUsuario,
-        // The end point of the route:
-        'waypoint1': r,
-        // To retrieve the shape of the route we choose the route
-        // representation mode 'display'
-        'representation': 'display'
+      if (ruta==0){
+        ruta=1;
+        var routingParameters = {
+          // The routing mode:
+          'mode': 'fastest;car',
+          // The start point of the route:
+          'waypoint0': ubicacionUsuario,
+          // The end point of the route:
+          'waypoint1': r,
+          // To retrieve the shape of the route we choose the route
+          // representation mode 'display'
+          'representation': 'display'
+        };
+
+        // Define a callback function to process the routing response:
+        var onResult = function(result) {
+          var route,
+            routeShape,
+            startPoint,
+            endPoint,
+            linestring;
+          if(result.response.route) {
+          // Pick the first route from the response:
+          route = result.response.route[0];
+          // Pick the route's shape:
+          routeShape = route.shape;
+
+          // Create a linestring to use as a point source for the route line
+          linestring = new H.geo.LineString();
+
+          // Push all the points in the shape into the linestring:
+          routeShape.forEach(function(point) {
+            var parts = point.split(',');
+            linestring.pushLatLngAlt(parts[0], parts[1]);
+          });
+
+          // Retrieve the mapped positions of the requested waypoints:
+          startPoint = route.waypoint[0].mappedPosition;
+          endPoint = route.waypoint[1].mappedPosition;
+
+          // Create a polyline to display the route:
+          routeLine = new H.map.Polyline(linestring, {
+            style: { strokeColor: 'blue', lineWidth: 3 }
+          });
+
+          // Create a marker for the start point:
+          startMarker = new H.map.Marker({
+            lat: startPoint.latitude,
+            lng: startPoint.longitude
+          });
+
+          // Create a marker for the end point:
+          endMarker = new H.map.Marker({
+            lat: endPoint.latitude,
+            lng: endPoint.longitude
+          });
+
+          // Add the route polyline and the two markers to the map:
+          map.addObjects([routeLine, startMarker, endMarker]);
+
+          // Set the map's viewport to make the whole route visible:
+          map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
+          }
+          getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
+         
+        };
+
+        // Get an instance of the routing service:
+        var router = platform.getRoutingService();
+        $$(".page").append('<div class="cancelarRuta fab fab-left-bottom color-red">'+
+          '<a href="#">'+
+            
+            '<i class="icon  f7-icons if-not-md">xmark</i>'+
+            
+            '<i class="icon cancelarRuta material-icons md-only">close</i>'+
+          '</a>'+
+
+        '</div>');
+        $$(".cancelarRuta").on('click', cancelarRuta);
+        // Call calculateRoute() with the routing parameters,
+        // the callback and an error callback function (called if a
+        // communication error occurs):
+        router.calculateRoute(routingParameters, onResult,
+          function(error) {
+            alert(error.message);
+          });
       };
-
-      // Define a callback function to process the routing response:
-      var onResult = function(result) {
-        var route,
-          routeShape,
-          startPoint,
-          endPoint,
-          linestring;
-        if(result.response.route) {
-        // Pick the first route from the response:
-        route = result.response.route[0];
-        // Pick the route's shape:
-        routeShape = route.shape;
-
-        // Create a linestring to use as a point source for the route line
-        linestring = new H.geo.LineString();
-
-        // Push all the points in the shape into the linestring:
-        routeShape.forEach(function(point) {
-          var parts = point.split(',');
-          linestring.pushLatLngAlt(parts[0], parts[1]);
-        });
-
-        // Retrieve the mapped positions of the requested waypoints:
-        startPoint = route.waypoint[0].mappedPosition;
-        endPoint = route.waypoint[1].mappedPosition;
-
-        // Create a polyline to display the route:
-        routeLine = new H.map.Polyline(linestring, {
-          style: { strokeColor: 'blue', lineWidth: 3 }
-        });
-
-        // Create a marker for the start point:
-        startMarker = new H.map.Marker({
-          lat: startPoint.latitude,
-          lng: startPoint.longitude
-        });
-
-        // Create a marker for the end point:
-        endMarker = new H.map.Marker({
-          lat: endPoint.latitude,
-          lng: endPoint.longitude
-        });
-
-        // Add the route polyline and the two markers to the map:
-        map.addObjects([routeLine, startMarker, endMarker]);
-
-        // Set the map's viewport to make the whole route visible:
-        map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
-        }
-        getDistanciaMetros(latUsuario,lonUsuario,lat2,lon2);
-       
-      };
-
-      // Get an instance of the routing service:
-      var router = platform.getRoutingService();
-      $$(".page").append('<div class="cancelarRuta fab fab-left-bottom color-yellow">'+
-        '<a href="#">'+
-          
-          '<i class="icon  f7-icons if-not-md">xmark</i>'+
-          
-          '<i class="icon cancelarRuta material-icons md-only">close</i>'+
-        '</a>'+
-
-      '</div>');
-      $$(".cancelarRuta").on('click', cancelarRuta);
-      // Call calculateRoute() with the routing parameters,
-      // the callback and an error callback function (called if a
-      // communication error occurs):
-      router.calculateRoute(routingParameters, onResult,
-        function(error) {
-          alert(error.message);
-        });
-
     };
     function cancelarRuta(){
       map.removeObjects([routeLine, startMarker, endMarker]);
@@ -1136,6 +1196,21 @@ objects: marcadores
       };
 
     function recalculaPosicion(){
+      
+      /*
+      function testObjectsEvents(map, logEvent) {
+        
+        markerUsu.addEventListener('pointerleave', logEvent);
+        
+
+      };
+      function logEvent(evt) {
+          console.log("click en el marcador");
+        };
+      testObjectsEvents(map, logEvent);
+      */
+
+
         var onSuccess = function(position) {
           latUsuario = position.coords.latitude;
           lonUsuario = position.coords.longitude;
@@ -1153,6 +1228,49 @@ objects: marcadores
      
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
 
+
+
+        var onMapWatchSuccess = function (position) {
+            
+            var latUsuarioActualizada = position.coords.latitude;
+            var lonUsuarioActualizada = position.coords.longitude;
+            
+            if (latUsuarioActualizada != latUsuario && lonUsuarioActualizada != lonUsuario) {
+         
+                latUsuario = latUsuarioActualizada;
+                lonUsuario = lonUsuarioActualizada;
+                console.log("estamos actualizando tu ubicacion!");
+                console.log("tu nueva ubicacion es:"+latUsuarioActualizada+" "+lonUsuarioActualizada);
+            }
+        }
+         
+        // Error callback
+         
+        function onMapError(error) {
+            console.log('code: ' + error.code + '\n' +
+                'message: ' + error.message + '\n');
+        }
+         
+        // Watch your changing position
+         
+        function watchMapPosition() {
+         
+            return navigator.geolocation.watchPosition
+            (onMapWatchSuccess, onMapError, { enableHighAccuracy: true });
+        }
+
+        watchMapPosition();
+
+
+
+
+
+
+
+
+
+
+
         var svgMarkup = '<svg width="42" height="42" ' +
               'xmlns="http://www.w3.org/2000/svg">' +
               '<rect stroke="white" fill="#1b468d" x="1" y="1" width="22" ' +
@@ -1160,7 +1278,7 @@ objects: marcadores
               'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
               'fill="white">O</text></svg>';
         var icon = new H.map.Icon(svgMarkup);
-        var marcadorUsuario = new H.map.Icon("https://image.flaticon.com/icons/png/512/1783/1783356.png", {size: {w: 25, h: 25}});
+        var marcadorUsuario = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727618.svg", {size: {w: 25, h: 25}});
         if (m==0){
           if (latUsuario!=0 && lonUsuario!=0) {
             coordsUsu = {lat: latUsuario, lng: lonUsuario};
@@ -1170,21 +1288,45 @@ objects: marcadores
              // centrar el mapa en una coordenada
             //console.log("estas en: "+coordsUsu)
           };
+        }else {
+          markerUsu.setGeometry( {lat: latUsuario, lng: lonUsuario} );
         };
-        if (m==1){
-          markerUsu.setPosition( coordsUsu );
-        };
+        
 
         var toggle = app.toggle.create({
-          el: '.toggleAlarma1',
+          el: '.toggle',
           on: {
             change: function () {
               console.log('Toggle changed');
+              if (a==1){
+                  map.removeObject(markerAlarma);
+                  a=0;
+                };
+
+
               if (toggle.checked) {
+                
+                if (u==1){
+                    container3.removeAll();
+                }; 
+                if(l==1){
+                  map.removeObject(container);
+                };
+                if (n==1){
+                  container2.removeAll();
+                };
+                if (f==1){
+                  container4.removeAll();
+                };
+                if(a==0){
+                  a=1;
+                  coordsAlarma = {lat: latAlarma1, lng: lonAlarma1};
+                  markerAlarma = new H.map.Marker(coordsAlarma , { icon: marcadorAlarma });
+                  map.addObject(markerAlarma);
+                };
                 console.log("toggle checked"+distanciaAlarma);
                 alarma=1;
-                latAlarma1=lat2;
-                lonAlarma1=lon2;
+                
                 app.dialog.alert('Te avisaremos cuando estes a '+distanciaAlarmaParaMostrar+" "+ "<font style='text-transform: lowercase;''>"+metrosOkilometrosParaMostrar+"</font>" ,"¡Listo!")
                 if (metrosOkilometros=="Kilometros"){
                   distanciaAlarma=distanciaAlarma*1000;
@@ -1206,24 +1348,80 @@ objects: marcadores
         //VAR alarma variable bandera para activar/desactivar alarma
         //VAR geocerca contiene la distancia en metros de la alarma
         if (alarma==1){
+                
+                getDistanciaMetros(latUsuario,lonUsuario,latAlarma1,lonAlarma1);
+                if (distancia>1000){
+                  distanciaParaMostrar=parseInt(distancia)/1000;
+                  unidad="Km";
+                }else {
+                  distanciaParaMostrar=parseInt(distancia);
+                  unidad="Mts";
+                }
           //MIDO DISTANCIA A DESTINO. lat2 y lon2 son las coordenadas marcadas como destino de ruta
           getDistanciaMetros(latUsuario,lonUsuario,latAlarma1,lonAlarma1);
-          $$(".page").append('<div class="cancelarAlarma fab fab-extended fab-center-bottom color-red">'+
-            '<a href="#">'+
-              
-              '<i class="icon  f7-icons if-not-md">xmark</i>'+
-              '<i class="icon cancelarRuta material-icons md-only">close</i>'+
-              '<div class="fab-text">Cancelar Alarma</div>'+
-            '</a>'+
+          if(fab==0){
+                  console.log(fab);
+                  fab=1;
+                  $$(".page").append(
+                    '<div class="contenedorFab">'+
+                      '<div class="fab fab-right-bottom color-yellow">'+
+                        '<a href="#">'+
+                          '<!-- Icons For iOS Theme -->'+
+                          '<i class="f7-icons size-22">bell</i>'+
+                          '<i class="icon f7-icons if-not-md">xmark</i>'+
+                          '<!-- Icons For MD Theme -->'+
+                          
+                          '<i class="icon material-icons md-only">close</i>'+
+                        '</a>'+
+                        '<!-- FAB speed dial actions -->'+
+                      
+                        '<div class="fab-buttons fab-buttons-top">'+
+                          '<a href="#" class="fab-label-button cancelarAlarma">'+
+                            '<span>X</span>'+
+                            '<span class="fab-label ">Desactivar</span>'+
+                          '</a>'+
+                          '<a href="#" class="fab-label-button botonfab">'+
+                            '<span><i class="f7-icons size-22">info</i></span>'+
+                            '<span class="fab-label labelAlarma">Distancia de alarma: '+distanciaAlarmaParaMostrar+' '+metrosOkilometrosParaMostrar+'</span>'+
+                          '</a>'+
+                          '<a href="#" class="fab-label-button">'+
+                            '<span><i class="f7-icons size-22">flag</i></span>'+
+                            '<span class="fab-label labelDestino">Distancia a destino: '+distanciaParaMostrar+' '+unidad+' </span>'+
+                          '</a>'+
+                        '</div>'+
+                      
+                      '</div>'+
+                    '</div>'
+                  );
+                }
+                if(fab==1){
+                  console.log(fab)
+                  
+                  $$(".labelAlarma").html('Distancia de alarma: '+distanciaAlarmaParaMostrar+' '+metrosOkilometrosParaMostrar);
 
-          '</div>');
+                  $$(".labelDestino").html('Distancia a destino: '+distanciaParaMostrar+' '+unidad);
+
+                  
+                };
+
+          
           $$(".cancelarAlarma").on('click', function(){
+            if (a==1){
+                  map.removeObject(markerAlarma);
+                  a=0;
+                };
             alarma=0;
-            $$(".cancelarAlarma").remove();
-            app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+            var desactivar=1;
+            if(desactivar==1){
+              desactivar=0;
+              $$(".contenedorFab").remove();
+              fab=0;
+              //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+            }
           });
           if(distancia <= distanciaAlarma){
             var pasado = distanciaAlarma - distancia;
+            app.dialog.alert('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!" );
             console.log("ya llegas. tu alarma se activo hace:"+pasado+" metros");
             console.log("estas a "+distancia+" metros de tu destino")
             //NOTIFICACION
@@ -1298,6 +1496,7 @@ objects: marcadores
                   inputEl: '#demo-picker-describe',
                   rotateEffect: false,
                   closeByOutsideClick: true,
+                  //value: [distanciaAlarma, metrosOkilometros],
                   /*onClose: function(pickerDescribe){console.log("picker cerrado") },
                   onChange: function (pickerDescribe,values,displayValues) {
                      distanciaAlarma= values[0];
@@ -1323,6 +1522,10 @@ objects: marcadores
                       metrosOkilometrosParaMostrar= picker.value[1];
                       console.log(distanciaAlarma);
                       console.log(metrosOkilometros);
+                        var latTranscision=lat2;
+                        var lonTranscision=lon2;
+                        latAlarma1=latTranscision;
+                        lonAlarma1=lonTranscision;
                       if (picker.value[0]!=""){
                         if ($$(".toggleAlarma1").hasClass('disabled')){
                           $$(".toggleAlarma1").removeClass('disabled');
@@ -1330,6 +1533,8 @@ objects: marcadores
                       } else {
                         $$(".toggleAlarma1").addClass('disabled');
                       }
+
+                        
                     }
                   }
 
