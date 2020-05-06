@@ -42,7 +42,7 @@ var usuario = { "email": "", "clave": "" };
 var usuarioLocal, claveLocal;
 var consultaLocal;
 // variables para firebase
-var nombreFavorito="";
+var nombreFavorito;
 //variables para gps
 
 var latUsuario, lonUsuario;
@@ -74,6 +74,8 @@ var n=0;
 //variables para ruta
 var routeLine, startMarker, endMarker;
 var ruta=0;
+var mapEvents;
+var behavior; 
 //variables para interaccion con mapa
 var m=0;
 var n=0;
@@ -136,8 +138,8 @@ $$(document).on('deviceready', function() {
     if ( iniciarDatos == 1 ) {
         fnIniciarDatos();
     }
-    
-    $$("#user").on('click', fnConsultarFavorito);
+    //$$(".cerrarSesion").on('click', signOut);
+    //$$("#user").on('click', fnConsultarFavorito);
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
     $$(".Ubicame").on('click', function(){
@@ -160,17 +162,27 @@ $$(document).on('deviceready', function() {
 
  
     //$$('#enviarRegistro').on('click', crearRegistro());
-    $$('#enviarRegistro').on('click', crearRegistro);
+   // $$('#enviarRegistro').on('click', crearRegistro);
     
-
+    var panel = app.panel.create({
+          el: '.panel-login',
+          swipeOnlyClose: true,
+          on: {
+                opened: function () {
+                  console.log('Panel opened')
+                }
+              }
+    });
 
             
 
 
     //$$('#enviarLogin').on('click', Loguearse()); // VA SIN LOS ()
-    $$('#enviarLogin').on('click', Loguearse);
-
-    
+  /*  $$('#enviarLogin').on('click', function(){
+      console.log("click en enviarlogin");
+     Loguearse();
+    });
+    */    
 
    
     //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
@@ -190,8 +202,27 @@ $$(document).on('page:init', function (e) {
     refTiposUsuarios= db.collection("TIPOS_USUARIOS");
     refFavoritos=db.collection("LUGARES_FAVORITOS");
 
+    $$('#enviarRegistro').on('click', crearRegistro);
+    
+    var panel = app.panel.create({
+          el: '.panel-login',
+          swipeOnlyClose: true,
+          on: {
+                opened: function () {
+                  console.log('Panel opened')
+                }
+              }
+    });
 
+            
+    $$("#user").on('click', fnConsultarFavorito);
 
+    //$$('#enviarLogin').on('click', Loguearse()); // VA SIN LOS ()
+    $$('#enviarLogin').on('click', function(){
+      console.log("click en enviarlogin");
+     Loguearse();
+    });
+    $$(".cerrarSesion").on('click', signOut);
 
 });
 
@@ -272,90 +303,79 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
         refFavoritos.add(data);
       
     }
-     function fnConsultarFavorito(){
+    function fnConsultarFavorito(){
+      
+        console.log("NO entra a consultar");
+        $$("#listaFavoritos").empty();
+        
+          console.log("entra a consultar");
+          consultafavorito=0;
+          refFavoritos.where("user","==",correo).get()
+            .then(function(querySnapshot){
+              querySnapshot.forEach(function(doc){
+                console.log("data: "+doc.data().nombre);
+                
+                console.log("data: "+doc.data().label);
+                
+                console.log("data: "+doc.data().coordenadas);
+                
+                console.log("data: "+doc.data().id);
+                console.log(doc.id);
 
-      $$("#listaFavoritos").empty();
-      refFavoritos.where("user","==",correo).get()
-        .then(function(querySnapshot){
-          querySnapshot.forEach(function(doc){
-            console.log("data: "+doc.data().nombre);
-            
-            console.log("data: "+doc.data().label);
-            
-            console.log("data: "+doc.data().coordenadas);
-            
-            console.log("data: "+doc.data().id);
-            console.log(doc.id);
-
-            
-            
-            $$("#listaFavoritos").append('<div class="list accordion-list '+doc.id+'">'+
-                                            '<ul>'+
-                                              '<li class="accordion-item"><a href="#" class="item-content item-link">'+
-                                                '<div class="item-inner">'+
-                                                  '<div class="item-title">'+doc.data().nombre+'</div>'+
-                                                '</div></a>'+
-                                                '<div class="accordion-item-content">'+
-                                                  '<div class="block">'+
-                                                    '<div class="list links-list">'+
-                                                      '<ul class="listaFavoritos">'+
-                                                        '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">Abrir</a></li>'+
-                                                        '<li class="eliminarFavorito" id="'+doc.id+'"><a href="#">Eliminar</a></li>' +
-                                                      '</ul>'+
+                
+                
+                $$("#listaFavoritos").append('<div class="list accordion-list '+doc.id+'">'+
+                                                '<ul>'+
+                                                  '<li class="accordion-item"><a href="#" class="item-content item-link">'+
+                                                    '<div class="item-inner">'+
+                                                      '<div class="item-title">'+doc.data().nombre+'</div>'+
+                                                    '</div></a>'+
+                                                    '<div class="accordion-item-content">'+
+                                                      '<div class="block">'+
+                                                        '<div class="list links-list">'+
+                                                          '<ul class="listaFavoritos">'+
+                                                          '<div class="contenedorFavorito" id="'+doc.data().nombre+'">'+
+                                                            '<li class="unFavorito" id="'+doc.data().coordenadas+'" name="'+doc.data().nombre+'"><a href="#">Abrir</a></li>'+
+                                                          '</div>'+  
+                                                            '<li class="eliminarFavorito" id="'+doc.id+'"><a href="#">Eliminar</a></li>' +
+                                                          '</ul>'+
+                                                        '</div>'+
+                                                      '</div>'+
                                                     '</div>'+
-                                                  '</div>'+
-                                                '</div>'+
-                                              '</li>'+
-                                            '</ul>'+
-                                          '</div>');
+                                                  '</li>'+
+                                                '</ul>'+
+                                              '</div>');
 
-            $$(".unFavorito").on('click',function(){
-                  console.log("hiciste click en un favorito");
-                  abrirFavorito(this.id);
-                  obtieneNombreFavorito(this.value);
-                  //app.popover.close(".popoverResultados",true);   
-            });
-            $$(".eliminarFavorito").on('click', function(){
-              eliminarFavorito(this.id);
-              $$("."+this.id).remove();
+                $$(".unFavorito").on('click',function(){
+                      console.log("hiciste click en un favorito");
+                      abrirFavorito(this.id);
+                      obtieneNombreFavorito(this.name);
+                      //app.popover.close(".popoverResultados",true);   
+                });
+                $$(".contenedorFavorito").on('click',function(){
+                      console.log("hiciste click en un contenedor favorito");
+                      
+                      obtieneNombreFavorito(this.id);
+                      //app.popover.close(".popoverResultados",true);   
+                });
+                $$(".eliminarFavorito").on('click', function(){
+                  eliminarFavorito(this.id);
+                  $$("."+this.id).remove();
+                  fnConsultarFavorito();
+                })
+              })
             })
-          })
-        })
     };
     function eliminarFavorito(docId){
       refFavoritos.doc(docId).delete();
     }
-    //ESTE ES EL CONTENIDO QUE HAY QUE PONER EN EN APPEND PARA PODER BORRAR LOS FAVORITOS
-    function paraLaburarElAppend(){
-                                '<div class="list accordion-list '+doc.id+'">'+
-                                  '<ul>'+
-                                    '<li class="accordion-item"><a href="#" class="item-content item-link">'+
-                                      '<div class="item-inner">'+
-                                        '<div class="item-title">favorito 1</div>'+
-                                      '</div></a>'+
-                                      '<div class="accordion-item-content">'+
-                                        '<div class="block">'+
-                                          '<div class="list links-list">'+
-                                            '<ul class="listaFavoritos">'+
-                                              '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">Abrir</a></li>'+
-                                              '<li class="eliminarFavorito" id="'+doc.id+'"><a href="#">Eliminar</a></li>' +
-                                            '</ul>'+
-                                          '</div>'+
-                                        '</div>'+
-                                      '</div>'+
-                                    '</li>'+
-                                  '</ul>'+
-                                '</div>'
-
-
-                                '<li class="unFavorito" id="'+doc.data().coordenadas+'" value="'+doc.data().nombre+'"><a href="#">'+doc.data().nombre+'</a></li>'
-    }
     function obtieneNombreFavorito(nombre){
-      nombreFavorito=nombre;
-    };
+       nombreFavorito=nombre;
+       console.log("obtienenombre:"+nombre)
+      };
     function abrirFavorito(lascoordenadas){
       console.log("entro a abrirFavorito y las coords son: "+lascoordenadas);
-
+      
       function reverseGeocode(platform) {
         console.log("entro a reversegeocode");
               var geocoder = platform.getGeocodingService(),
@@ -405,7 +425,7 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
                           objects: [marker2]
                         });
                       map.addObject(container4);
-
+                      marker2.addEventListener('tap', abrirDynamicSheet2);
                       map.setCenter(coordsBusqueda);
                       app.panel.close(".panel-user", true)
                   };
@@ -420,7 +440,10 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
             dynamicSheet.close();
             }*/
     }
-
+    function abrirDynamicSheet2(){
+      // funcion para el click sobre el marcador
+      dynamicSheet2.open();
+    }
     function crearDynamicSheet2(){
         e=1;
               dynamicSheet2 = app.sheet.create({
@@ -434,17 +457,20 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
                 content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
                             '<div class="swipe-handler">'+  
                               '<div class="sheet-modal-inner">'+
-                                
                                 '<div class="sheet-modal-swipe-step">'+
                                   '<div class="block">'+
-                                    '<h2>'+label+'</h2>'+
-                                    '<div class="row">'+
-                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
-                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
-                                    '</div>'+
-                                    '<p>Tus coordenadas son:</p>'+
-                                    '<p>'+coordenadas+'</p>'+
-                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                    '<h2 class="text-align-center">'+nombreFavorito+'</h2>'+
+                                    '<h3 class="text-align-center">'+label+'</h3>'+
+                                    '<div class="row no-gap display-flex flex-direction-row justify-content-space-around">'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div id="'+coordenadas+'" class=" crearRuta boton button button-round button-fill color-red no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">arrow_turn_up_right</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-red" >RUTA</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="col-50 activarAlarma boton button button-round button-fill color-yellow no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">bell</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-yellow" >ALARMA</p>'+
+                                      '</div>'+
+                                    '</div>'+ 
                                   '</div>'+
                                 '</div>'+
                               '</div>'+
@@ -496,8 +522,8 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
     };
 
 function crearRegistro(){
-        var correo = $$('#emailRegistro').val();
-        var clave = $$('#claveRegistro').val();
+        correo = $$('#emailRegistro').val();
+        clave = $$('#claveRegistro').val();
         //Se declara la variable huboError (bandera)
 
 
@@ -509,8 +535,18 @@ function crearRegistro(){
                 //Si hubo algun error, ponemos un valor referenciable en la variable huboError
                 huboError = 1;
                 var errorCode = error.code;
-                var errorMessage = error.message;
-               
+                var errorMessage;
+                if(errorCode=="auth/weak-password"){
+                  errorMessage="La contraseña debe tener 6 caracteres como minimo";
+                };
+                if(errorCode=="auth/invalid-email"){
+                  errorMessage="Ingrese una dirección de email valida";
+                };
+                if(errorCode=="auth/email-already-in-use"){
+                  errorMessage="Esta dirección de correo ya está en uso";
+                };
+                app.dialog.alert(errorMessage, "Lo siento");
+
                 console.log(errorCode);
                 console.log(errorMessage);
             })
@@ -518,17 +554,49 @@ function crearRegistro(){
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
                     app.panel.close('.panel-registro', true);
-                    alert("ok");
-                    $$("#tituloindex").text(correo);
-                    mainView.router.navigate("/about/");
-                    console.log(huboError);
+                    $$("#user").text(correo);
+                    $$("#nombreUsuario").text(correo);
+                    $$("#user").attr("data-panel",".panel-user");
+                    var iniciales=correo[0];
+                    console.log(iniciales);
+                    usuario = { email: correo, clave: clave };
+                    console.log("usuario, te estamos guardando"); 
+                    var usuarioAGuardar = JSON.stringify(usuario);
+                    if($$("input[name='loginRecordar']").is(':checked')){
+                      console.log("checked");
+                      usuario = { email: correo, clave: clave };
+                    
+                      console.log("usuario, te estamos guardando");
+                      //storage.setItem("persona", persona); -> guardará [object Object]
+                      var usuarioAGuardar = JSON.stringify(usuario);
+                      // por eso convertimos el JSON en un string
+                      
+                      
+                      storage.setItem("usuario", usuarioAGuardar);
+                      console.log("usuarioAGuardar: " + usuarioAGuardar);
+                      console.log("usuario: " + usuario.email + "password: " + usuario.clave);
+                    }else{
+                      console.log("nochecked");
+                    };  
                 }
             }); 
             // [END createwithemail]
     };
-
+    function signOut(){
+      firebase.auth().signOut().then(function() {
+        // Sign-out successful.
+        console.log("te deslogueaste");
+        app.panel.close('.panel-user', true);
+                    $$("#user").text("Iniciá sesión");
+                    
+                    $$("#user").attr("data-panel",".panel-login");
+                    storage.clear();
+      }).catch(function(error) {
+        // An error happened.
+      });
+    }
     function Loguearse(){
-      
+      console.log("entro a loguearse");
         correo = $$('#emailLogin').val();
         clave = $$('#claveLogin').val();
 
@@ -539,11 +607,20 @@ function crearRegistro(){
                 //Si hubo algun error, ponemos un valor referenciable en la variable huboError
                 huboError = 1;
                 var errorCode = error.code;
-                var errorMessage = error.message;
+                var errorMessage;
+                if (errorCode == "auth/invalid-email"){
+                  errorMessage="Ingrese una dirección de email valida";
+                }
+                if(errorCode=="auth/user-not-found"){
+                  errorMessage="No se encuentra ningun usuario registrado con esa dirección de email";
+                }
+                if(errorCode=="auth/wrong-password"){
+                  errorMessage="La contraseña ingresada es incorrecta";
+                }
                 console.error(errorMessage);
                 console.log(errorCode);
-                alert(errorMessage);
-                alert(errorCode);
+                //alert(errorMessage);
+                app.dialog.alert(errorMessage, "Lo siento");
                 app.panel.close('.panel-login', true);
             })
             .then(function(){   
@@ -551,22 +628,32 @@ function crearRegistro(){
                 if(huboError == 0){
                     
                     app.panel.close('.panel-login', true);
-                    mensajeLogin();
+                    //mensajeLogin();
                     $$("#user").text(correo);
-                    $$("nombreUsuario").text(correo);
-                    $$("user").attr("data-panel",".panel-user");
+                    $$("#nombreUsuario").text(correo);
+                    $$("#user").attr("data-panel",".panel-user");
+                    var iniciales=correo[0];
+                    console.log(iniciales);
                     usuario = { email: correo, clave: clave };
-                    
-                    console.log("usuario, te estamos guardando");
-                    //storage.setItem("persona", persona); -> guardará [object Object]
+                    console.log("usuario, te estamos guardando"); 
                     var usuarioAGuardar = JSON.stringify(usuario);
-                    // por eso convertimos el JSON en un string
+
+                    if($$("input[name='loginRecordar']").is(':checked')){
+                      console.log("checked");
+                      usuario = { email: correo, clave: clave };
                     
-                    
-                    storage.setItem("usuario", usuarioAGuardar);
-                    console.log("usuarioAGuardar: " + usuarioAGuardar);
-                    console.log("usuario: " + usuario.email + "password: " + usuario.clave);
-                    
+                      console.log("usuario, te estamos guardando");
+                      //storage.setItem("persona", persona); -> guardará [object Object]
+                      var usuarioAGuardar = JSON.stringify(usuario);
+                      // por eso convertimos el JSON en un string
+                      
+                      
+                      storage.setItem("usuario", usuarioAGuardar);
+                      console.log("usuarioAGuardar: " + usuarioAGuardar);
+                      console.log("usuario: " + usuario.email + "password: " + usuario.clave);
+                    }else{
+                      console.log("nochecked");
+                    };  
                     
                 }
             }); 
@@ -854,9 +941,9 @@ objects: marcadores
             */
 
           // Enable the event system on the map instance:
-          var mapEvents = new H.mapevents.MapEvents(map);
+          mapEvents = new H.mapevents.MapEvents(map);
           // Instantiate the default behavior, providing the mapEvents object:
-          var behavior = new H.mapevents.Behavior(mapEvents);
+          behavior = new H.mapevents.Behavior(mapEvents);
 
           // Get an instance of the geocoding service:
           var service = platform.getSearchService();
@@ -866,7 +953,9 @@ objects: marcadores
           // communication error occurs):
 
          // Add event listeners:
-          map.addEventListener('longpress', function(evt) {
+          map.addEventListener('longpress', logEvent); 
+          
+          function logEvent(evt) {  
               // Log 'tap' and 'mouse' events:
               console.log(evt.type, evt.currentPointer.type);
               console.log(n);
@@ -944,7 +1033,7 @@ objects: marcadores
             reverseGeocode(platform)
             console.log(coordenadas);
             console.log(coord.lat+","+coord.lng);
-      });
+      };
 
 
         
@@ -1022,22 +1111,23 @@ objects: marcadores
                 content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
                             '<div class="swipe-handler">'+  
                               '<div class="sheet-modal-inner">'+
-                                
                                 '<div class="sheet-modal-swipe-step">'+
                                   '<div class="block">'+
                                     '<h2>'+label+'</h2>'+
-                                    '<div class="row">'+
-                                      '<div id="'+coordenadas+'" class="col-50 crearRuta boton button button-round button-fill">Obtener ruta</div>'+
-                                      '<div class="col-50 activarAlarma boton button button-round button-fill">Activar alarma</div>'+
-                                    '</div>'+
-                                     '<div class="row">'+
-                                      '<div class="col-33"></div>'+
-                                      '<div class="col-33 GuardarFavorito open-prompt boton button button-round button-fill style="height:10vh; width:10vh; border-radius:50">GUARDAR</div>'+
-                                      '<div class="col-33"></div>'+
-                                    '</div>'+
-                                    '<p>Tus coordenadas son:</p>'+
-                                    '<p>'+coordenadas+'</p>'+
-                                    '<p><a href="#" class="link sheet-close">Close me</a></p>'+
+                                    '<div class="row no-gap display-flex flex-direction-row justify-content-space-around">'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div id="'+coordenadas+'" class=" crearRuta boton button button-round button-fill color-red no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">arrow_turn_up_right</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-red" >RUTA</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="GuardarFavorito open-prompt boton button button-round button-fill color-blue no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">star</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-blue" >GUARDAR</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="col-50 activarAlarma boton button button-round button-fill color-yellow no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">bell</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-yellow" >ALARMA</p>'+
+                                      '</div>'+
+                                    '</div>'+ 
                                   '</div>'+
                                 '</div>'+
                               '</div>'+
@@ -1076,16 +1166,19 @@ objects: marcadores
               });
 
       };
+
+
     function crearRuta(r){
       console.log(r);
       if (ruta==1){
         map.removeObjects([routeLine, startMarker, endMarker]);
-        console.log("entro a cancelar ruta")
+        console.log("borro ruta anterior")
         $$(".cancelarRuta").remove();
         ruta=0;
       }
       // Create the parameters for the routing request:
       if (ruta==0){
+        console.log("entro a crearRuta");
         ruta=1;
         var routingParameters = {
           // The routing mode:
@@ -1141,7 +1234,8 @@ objects: marcadores
             lat: endPoint.latitude,
             lng: endPoint.longitude
           });
-
+          endMarker.setData(endPoint.latitude+","+endPoint.longitude);
+          endMarker.addEventListener('tap', abrirDynamicSheet);
           // Add the route polyline and the two markers to the map:
           map.addObjects([routeLine, startMarker, endMarker]);
 
@@ -1154,6 +1248,10 @@ objects: marcadores
 
         // Get an instance of the routing service:
         var router = platform.getRoutingService();
+
+        
+        
+
         $$(".page").append('<div class="cancelarRuta fab fab-left-bottom color-red">'+
           '<a href="#">'+
             
@@ -1172,11 +1270,97 @@ objects: marcadores
             alert(error.message);
           });
       };
+
+      function abrirDynamicSheet(evt){
+
+              // Log 'tap' and 'mouse' events:
+
+              //console.log(evt.target.getData());
+              coordenadas=evt.target.getData();
+              console.log(coordenadas);
+              
+
+              //lat2=coord.lat;
+              //lon2=coord.lng;
+              if (u==1){
+                //map.removeObject(marker);
+              };
+              if (u==1){
+                    container3.removeAll();
+                  }; 
+              if(l==1){
+              map.removeObject(container);
+              };
+              if (n==1){
+                  container2.removeAll();
+                  
+                  console.log("tendria que borrar"+n);
+                };
+            if (e==1){
+              dynamicSheet2.close();
+            };
+            if (f==1){
+                  container4.removeAll();
+                };
+            if (d==1){
+              dynamicSheet.close();
+            };
+            console.log("coordenadas"+coordenadas);
+          /*
+          var bubble =  new H.ui.InfoBubble(coord, {
+                  content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
+                 });
+          
+          ui.addBubble(bubble); */
+           //addMarker(coord);
+            
+          function reverseGeocode2(platform) {
+            console.log("entro a reversegeocode");
+              var geocoder = platform.getGeocodingService(),
+                parameters = {
+                  prox: coordenadas+",57",
+                  mode: 'retrieveAddresses',
+                  maxresults: '1',
+                  gen: '9'};
+
+              geocoder.reverseGeocode(parameters,
+                function (result) {
+                  g=1;
+                  console.log("aca estamos");
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                  locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                  console.log("locationId"+locationId)
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                  label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                  //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                  if (g==1){
+                    crearDynamicSheet();
+                    
+                  };
+                }, function (error) {
+                  alert(error);
+                }
+              );
+              
+          };
+          reverseGeocode2(platform);
+        /*
+        console.log("entro al evento del marcador");
+        dynamicSheet.open();
+        */
+      }
+
+
+
+
+
+
     };
     function cancelarRuta(){
       map.removeObjects([routeLine, startMarker, endMarker]);
       console.log("entro a cancelar ruta")
       $$(".cancelarRuta").remove();
+      ruta=0;
     };
     function getDistanciaMetros(lat1,lon1,lat2,lon2){
 
@@ -1420,8 +1604,24 @@ objects: marcadores
             }
           });
           if(distancia <= distanciaAlarma){
+            
             var pasado = distanciaAlarma - distancia;
-            app.dialog.alert('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!" );
+            //app.dialog.alert('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!" );
+            app.dialog.confirm('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!", function () {
+              if (a==1){
+                map.removeObject(markerAlarma);
+                a=0;
+              };
+              alarma=0;
+              var desactivar=1;
+              if(desactivar==1){
+                desactivar=0;
+                $$(".contenedorFab").remove();
+                fab=0;
+                //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+              }
+              app.dialog.alert('Tu alarma se desactivó' , "Listo");
+            });
             console.log("ya llegas. tu alarma se activo hace:"+pasado+" metros");
             console.log("estas a "+distancia+" metros de tu destino")
             //NOTIFICACION
@@ -1877,6 +2077,7 @@ objects: marcadores
     function LoguearseConLocal(u,c ){
              console.log("loguearseconlocal, u+c"+u+c)
              correo=u;
+             iniciales=correo[0];
         //Se declara la variable huboError (bandera)
         var huboError = 0;     
         firebase.auth().signInWithEmailAndPassword(u, c)
@@ -1893,7 +2094,7 @@ objects: marcadores
             .then(function(){   
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
-                  $$("#user").text(u);
+                  $$("#user").text(iniciales);
                   console.log("te logueaste");
                   
                   $$("#nombreUsuario").text(u);

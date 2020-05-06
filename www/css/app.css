@@ -1,4 +1,12 @@
 /* Your app custom styles here */
+
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&display=swap');
+
+.nombreApp{
+	font-family: 'Kalam', cursive;
+	
+};
+
 .popoverResultados{
 	width: 90vw;
 }

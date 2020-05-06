@@ -75,8 +75,9 @@
                 <div class="navbar">
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
-                        <a id="user" data-panel=".panel-login" class="panel-open">LOGIN</a>
-                        
+                        <div class="left"><a id="user" data-panel=".panel-login" class="panel-open">LOGIN</a></div>
+
+                        <div class="title nombreApp text-color-yellow" style="font-size: 35px;">Joyride</div>
                         
                     </div>
                 </div>
@@ -111,7 +112,10 @@
                             <div id="botones" class="block  text-align-center">
                               <a id="enviarLogin" class="boton button button-round button-fill">Iniciar sesión</a>
                             </div>
-                            <div id="botones" class="text-align-center">
+                            <div class="guardarEnLocal text-align-center" style="margin-bottom: 5vh;">
+                              <label class="radio"><input type="radio" id="loginRecordar" name="loginRecordar"><i class="icon-radio"></i></label> Mantener sesión iniciada
+                            </div>
+                            <div id="botones" class="text-align-center " style="margin-bottom: 5vh;">
                               ¿Aún no sos usuario? <a href="#" data-panel=".panel-registro" class="panel-open">Registrate</a>
                             </div>
                             <div id="google" class="text-align-center">
@@ -154,7 +158,9 @@
                     <div id="botones" class="block  text-align-center">
                        <a id="enviarRegistro" class="boton button button-round button-fill">Registrame</a>
                     </div>
-                    
+                    <div class="guardarEnLocal" style="margin-bottom: 5vh;">
+                      <label class="radio"><input type="radio" id="loginRecordar" name="loginRecordar"><i class="icon-radio"></i></label> Mantener sesión iniciada
+                    </div>
                     <!-- Click on link with "panel-open" and data-panel=".panel-right" attribute will open Right panel -->
                     <p>¿Ya estas registrado? <a href="#" data-panel=".panel-login" class="panel-open">Inicia sesion</a></p>
                     <!-- Clicking on link with "panel-close" class will close panel -->
@@ -163,10 +169,14 @@
                 </div>
 
 
-                <div id="panelUser" class="panel panel-left panel-cover panel-user">
+                <div id="panelUser" class="panel panel-left panel-cover panel-user" data-collapsed-breakpoint="768"
+  data-visible-breakpoint="1024" data-swipe="true">
                   <div class="block">
-                    <h4 id="nombreUsuario"></h4>
-                    
+                    <h4>¡Bienvenido!</h4>
+                    <p class="no-margin-bottom no-padding-bottom">Usuario:</p>
+                    <h3 id="nombreUsuario"></h3>
+                    <button class="col button button-outline button-round cerrarSesion">Cerrar sesión</button>
+                    <div class="page-content">
                     
                       <div class="list accordion-list consultarFavoritos">
                         <ul>
@@ -183,7 +193,7 @@
                           </li>
                         </ul>
                       </div>
-
+                    </div>
 
 
                   </div>
