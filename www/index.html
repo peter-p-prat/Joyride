@@ -67,15 +67,15 @@
     <!-- Your main view, should have "view-main" class -->
     <div class="view view-main">
       <!-- Initial Page, "data-name" contains page name -->
-      <div data-name="index" class="page">
+      <div data-name="index" class="page color-theme-deeppurple">
         <!--   
         <a id="user" data-panel=".panel-login" class="panel-open">LOGIN Y REGISTRO</a>
         -->
                 <!-- Top Navbar -->
-                <div class="navbar">
+                <div class="navbar color-theme-deeppurple">
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
-                        <div class="left"><a id="user" data-panel=".panel-login" class="panel-open">LOGIN</a></div>
+                        <div class="left"><a id="user" data-panel=".panel-login" class="panel-open display-flex flex-direction-row justify-content-space-around" style='text-transform: uppercase;'><i class="f7-icons size-45 no-margin no-padding align-content-center align-items-center justify-content-center">person_crop_circle</i></a></div>
 
                         <div class="title nombreApp text-color-yellow" style="font-size: 35px;">Joyride</div>
                         
@@ -83,7 +83,7 @@
                 </div>
 
                 <!-- PANEL -->
-                <div id="panelLogin" class="panel panel-left panel-cover panel-login">
+                <div id="panelLogin" class="panel panel-left panel-cover panel-login color-theme-deeppurple">
                   <div class="block">
                     <h4>Inicia sesión</h4>
                             <form class="list" id="formularioLogin">
@@ -122,13 +122,13 @@
                               <div class="button">inicia sesion con google</div>
                             </div>
                             <!-- Clicking on link with "panel-close" class will close panel -->
-                            <p><a href="#" class="panel-close">Close me</a></p>
+                            
                   </div>
                 </div>
 
 
 
-                <div class="panel panel-left panel-cover panel-registro">
+                <div class="panel panel-left panel-cover panel-registro color-theme-deeppurple">
                   <div class="block">
                     <h4>Registrate</h4>
                     <p> Ingresá una dirección de e-mail valida en la que puedas recibir un correo de validación</p>
@@ -164,25 +164,25 @@
                     <!-- Click on link with "panel-open" and data-panel=".panel-right" attribute will open Right panel -->
                     <p>¿Ya estas registrado? <a href="#" data-panel=".panel-login" class="panel-open">Inicia sesion</a></p>
                     <!-- Clicking on link with "panel-close" class will close panel -->
-                    <p><a href="#" class="panel-close">Cerrar</a></p>
+                    
                   </div>
                 </div>
 
 
-                <div id="panelUser" class="panel panel-left panel-cover panel-user" data-collapsed-breakpoint="768"
-  data-visible-breakpoint="1024" data-swipe="true">
+                <div id="panelUser" class="panel panel-left panel-cover panel-user color-theme-deeppurple"  data-swipe="true">
+                  <div class="page-content">
                   <div class="block">
                     <h4>¡Bienvenido!</h4>
                     <p class="no-margin-bottom no-padding-bottom">Usuario:</p>
                     <h3 id="nombreUsuario"></h3>
                     <button class="col button button-outline button-round cerrarSesion">Cerrar sesión</button>
-                    <div class="page-content">
+                    
                     
                       <div class="list accordion-list consultarFavoritos">
                         <ul>
                           <li class="accordion-item "><a href="#" class="item-content item-link">
                               <div class="item-inner">
-                                <div class="item-title consultarFavoritos">Favoritos</div>
+                                <div class="item-title consultarFavoritos">Sitios guardados</div>
                               </div></a>
                             <div class="accordion-item-content">
                               <div id="listaFavoritos" class="block ">
@@ -217,7 +217,7 @@
                   <div class="popover-resultados"></div>
 
                   <div class="contenedormapa block block-strong text-align-center">
-                    <div style="width: 100vw; height: 82.5vh" id="mapContainer1">
+                    <div style="width: 100vw; height: 83.1vh" id="mapContainer1">
                     
                   </div>
                   

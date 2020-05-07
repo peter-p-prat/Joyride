@@ -1,10 +1,10 @@
 /* Your app custom styles here */
 
 @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600&display=swap');
 .nombreApp{
 	font-family: 'Kalam', cursive;
-	
+	/*font-family: 'Quicksand', sans-serif;*/
 };
 
 .popoverResultados{
@@ -14,7 +14,7 @@
 	max-height: 80vh;
 }
 .contenedorBuscador{
-	width: 95vw;
+	width: 98vw;
 	
 	margin: 0px;
 	padding: 0px;

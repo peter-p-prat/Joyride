@@ -34,7 +34,8 @@ var app = new Framework7({
 
 var mainView = app.views.create('.view-main');
 
-var correo, clave;
+var correo="";
+var clave;
 
 //variables para local
 var storage = window.localStorage;
@@ -76,7 +77,14 @@ var routeLine, startMarker, endMarker;
 var ruta=0;
 var mapEvents;
 var behavior; 
+
+var marcadorStartMarker = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727631.svg", {size: {w: 50, h: 50}});
+var marcadorEndMarker = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727583.svg", {size: {w: 50, h: 50}});
+
+
 //variables para interaccion con mapa
+var marcadorRandom = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727619.svg", {size: {w: 50, h: 50}});
+var borraMarcador;
 var m=0;
 var n=0;
 var marcadorFavorito = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727584.svg", {size: {w: 50, h: 50}});
@@ -98,6 +106,8 @@ var g=0;
 var lat2;
 var lon2;
 //variables para alarmas
+var dialogAlerta =0;
+var losalertdealarma=0;
 var a=0; //variable bandera marcador alarma
 var marcadorAlarma = new H.map.Icon("https://image.flaticon.com/icons/svg/727/727606.svg", {size: {w: 50, h: 50}});
 var coordsAlarma;
@@ -142,13 +152,7 @@ $$(document).on('deviceready', function() {
     //$$("#user").on('click', fnConsultarFavorito);
     $$(".guardarBd").on('click', guardar);
     $$("#consultarBd").on('click', consultar);
-    $$(".Ubicame").on('click', function(){
-      console.log(distanciaAlarma);
-      ubicame();
-    }); 
-    $$('.cerrarPicker').on('click', function(){
-      pickerDescribe.close();
-    })
+    
 
     var panel = app.panel.create({
           el: '.panel-registro',
@@ -205,7 +209,7 @@ $$(document).on('page:init', function (e) {
     $$('#enviarRegistro').on('click', crearRegistro);
     
     var panel = app.panel.create({
-          el: '.panel-login',
+          el: '.panel-registro',
           swipeOnlyClose: true,
           on: {
                 opened: function () {
@@ -214,8 +218,30 @@ $$(document).on('page:init', function (e) {
               }
     });
 
+
+    var panel = app.panel.create({
+          el: '.panel-login',
+          swipeOnlyClose: true,
+          on: {
+                opened: function () {
+                  console.log('Panel opened')
+                }
+              }
+    });
+    $$(".Ubicame").on('click', function(){
+      console.log(distanciaAlarma);
+      ubicame();
+    }); 
+    $$('.cerrarPicker').on('click', function(){
+      pickerDescribe.close();
+    })
             
-    $$("#user").on('click', fnConsultarFavorito);
+    $$("#user").on('click', function(){
+     fnConsultarFavorito();
+     if (g==1){
+        dynamicSheet.close()
+      };
+    });
 
     //$$('#enviarLogin').on('click', Loguearse()); // VA SIN LOS ()
     $$('#enviarLogin').on('click', function(){
@@ -301,7 +327,20 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
           nombre: n,
         }
         refFavoritos.add(data);
-      
+      if (n==1){
+        lascoordenadas= marcador.getData();
+        console.log("getdata:"+lascoordenadas);
+        abrirFavorito(lascoordenadas);
+        
+      };
+      if (u==1){
+        lascoordenadas= marker.getData();
+        console.log("getdata:"+lascoordenadas);
+        abrirFavorito(lascoordenadas);
+      };
+      if (f==1){
+        container4.removeAll();
+      };
     }
     function fnConsultarFavorito(){
       
@@ -412,6 +451,12 @@ $$(document).on('page:init', '.page[data-name="about"]', function (e) {
                         dynamicSheet2.close();
                       }
                       crearDynamicSheet2();
+                      if (n==1){
+                        container2.removeAll();
+                        
+                        console.log("tendria que borrar"+n);
+                        n=0;
+                      };
                       if (u==1){
                         container3.removeAll();
                       };
@@ -554,7 +599,7 @@ function crearRegistro(){
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
                     app.panel.close('.panel-registro', true);
-                    $$("#user").text(correo);
+                    //$$("#user").text(correo);
                     $$("#nombreUsuario").text(correo);
                     $$("#user").attr("data-panel",".panel-user");
                     var iniciales=correo[0];
@@ -587,10 +632,11 @@ function crearRegistro(){
         // Sign-out successful.
         console.log("te deslogueaste");
         app.panel.close('.panel-user', true);
-                    $$("#user").text("Iniciá sesión");
+                    //$$("#user").text("Iniciá sesión");
                     
                     $$("#user").attr("data-panel",".panel-login");
                     storage.clear();
+                    correo="";
       }).catch(function(error) {
         // An error happened.
       });
@@ -629,7 +675,7 @@ function crearRegistro(){
                     
                     app.panel.close('.panel-login', true);
                     //mensajeLogin();
-                    $$("#user").text(correo);
+                    //$$("#user").text(correo);
                     $$("#nombreUsuario").text(correo);
                     $$("#user").attr("data-panel",".panel-user");
                     var iniciales=correo[0];
@@ -868,15 +914,89 @@ objects: marcadores
               console.log(item.address.street+", " +item.address.houseNumber+", " 
                 +item.address.city+", " +item.address.state+", " +item.address.countryName);
               */
-              eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
+              eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"),{icon:marcadorRandom})");
               container2 = new H.map.Group({
                     objects: [marcador]
                   });
                 map.addObject(container2);
+                marcador.setData(coordenadas);
+                marcador.addEventListener('tap', abrirDynamicSheetBusqueda);
             };
           
         });
       }, alert);
+      function abrirDynamicSheetBusqueda(evt){
+
+              // Log 'tap' and 'mouse' events:
+
+              //console.log(evt.target.getData());
+              coordenadas=evt.target.getData();
+              console.log(coordenadas);
+              
+
+              //lat2=coord.lat;
+              //lon2=coord.lng;
+              if (u==1){
+                //map.removeObject(marker);
+              };
+              
+              if(l==1){
+              map.removeObject(container);
+              };
+              
+            if (e==1){
+              dynamicSheet2.close();
+            };
+            if (f==1){
+                  container4.removeAll();
+                };
+            if (g==1){
+              dynamicSheet.close()
+            };
+            console.log("coordenadas"+coordenadas);
+          /*
+          var bubble =  new H.ui.InfoBubble(coord, {
+                  content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
+                 });
+          
+          ui.addBubble(bubble); */
+           //addMarker(coord);
+            
+          function reverseGeocode2(platform) {
+            console.log("entro a reversegeocode");
+              var geocoder = platform.getGeocodingService(),
+                parameters = {
+                  prox: coordenadas+",57",
+                  mode: 'retrieveAddresses',
+                  maxresults: '1',
+                  gen: '9'};
+
+              geocoder.reverseGeocode(parameters,
+                function (result) {
+                  g=1;
+                  console.log("aca estamos");
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                  locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                  console.log("locationId"+locationId)
+                  console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                  label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                  //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                  if (g==1){
+                    crearDynamicSheetBusquedaLongpress();
+                    
+                  };
+                }, function (error) {
+                  alert(error);
+                }
+              );
+              
+          };
+          reverseGeocode2(platform);
+        /*
+        console.log("entro al evento del marcador");
+        dynamicSheet.open();
+        */
+      }
     }
     function ubicame(){
       console.log("te llevo a donde vos estes");
@@ -1040,17 +1160,92 @@ objects: marcadores
       
       function agregarMarcadorAlCliquear(){
             u=1;
-            marker = new H.map.Marker(coord);
+            marker = new H.map.Marker(coord,{icon:marcadorRandom});
           
             //eval("marcador = new H.map.Marker(new H.geo.Point("+item.position.lat+", "+item.position.lng+"))");
             container3 = new H.map.Group({
                   objects: [marker]
                 });
               map.addObject(container3);
-
+              marker.setData(coordenadas);
+              marker.addEventListener('tap', abrirDynamicSheetLongpress);
 
           //map.addObject(marker);
           map.setCenter(coord);
+          borraMarcador=1;
+
+            function abrirDynamicSheetLongpress(evt){
+
+                // Log 'tap' and 'mouse' events:
+
+                //console.log(evt.target.getData());
+                coordenadas=evt.target.getData();
+                console.log(coordenadas);
+                console.log("entro")
+
+                //lat2=coord.lat;
+                //lon2=coord.lng;
+                if (u==1){
+                  //map.removeObject(marker);
+                };
+                
+                if(l==1){
+                map.removeObject(container);
+                };
+                
+              if (e==1){
+                dynamicSheet2.close();
+              };
+              if (f==1){
+                    container4.removeAll();
+                  };
+              if (g==1){
+                dynamicSheet.close()
+              };
+              console.log("coordenadas"+coordenadas);
+            /*
+            var bubble =  new H.ui.InfoBubble(coord, {
+                    content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
+                   });
+            
+            ui.addBubble(bubble); */
+             //addMarker(coord);
+              
+            function reverseGeocode2(platform) {
+              console.log("entro a reversegeocode");
+                var geocoder = platform.getGeocodingService(),
+                  parameters = {
+                    prox: coordenadas+",57",
+                    mode: 'retrieveAddresses',
+                    maxresults: '1',
+                    gen: '9'};
+
+                geocoder.reverseGeocode(parameters,
+                  function (result) {
+                    g=1;
+                    console.log("aca estamos");
+                    console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                    locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                    console.log("locationId"+locationId)
+                    console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                    label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                    //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                    if (g==1){
+                      crearDynamicSheetBusquedaLongpress();
+                      
+                    };
+                  }, function (error) {
+                    alert(error);
+                  }
+                );
+                
+            };
+            reverseGeocode2(platform);
+          /*
+          console.log("entro al evento del marcador");
+          dynamicSheet.open();
+          */
+        }
       };  
      
       
@@ -1097,6 +1292,85 @@ objects: marcadores
 
         
     };
+
+    function crearDynamicSheetBusquedaLongpress(){
+        d=1;
+        console.log("entro a createDyamicSheet");
+              dynamicSheet = app.sheet.create({
+                El: ".hojamarcador",
+                backdropEl: ".contenedormapa",
+                swipeToClose: true,
+                swipeToStep: true,
+                 backdrop: true,
+                 closeByOutsideClick:false,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+label+'</h2>'+
+                                    '<div class="row no-gap display-flex flex-direction-row justify-content-space-around">'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div id="'+coordenadas+'" class=" crearRuta boton button button-round button-fill color-red no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">arrow_turn_up_right</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-red" >RUTA</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="GuardarFavorito open-prompt boton button button-round button-fill color-blue no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">star</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-blue" >GUARDAR</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="col-50 activarAlarma boton button button-round button-fill color-yellow no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">bell</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-yellow" >ALARMA</p>'+
+                                      '</div>'+
+                                    '</div>'+ 
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              dynamicSheet.open();
+              $$(".crearRuta").on('click',function(){
+                  crearRuta(this.id);
+                  dynamicSheet.close();
+                  //map.removeObject(marker); 
+                  if (u==1){
+                    container3.removeAll();
+                  }; 
+                  if (n==1){
+                    container2.removeAll();
+                  }; 
+              });
+              $$(".activarAlarma").on('click',function(){
+                  console.log("hiciste click en activar alarma");
+                  activarAlarma();  
+              });
+              $$(".GuardarFavorito").on('click',function(){
+                  console.log(locationId);
+                  console.log(label);
+                  console.log(coordenadas);
+                  //fnGuardarFavorito();
+                  $$('.open-prompt').on('click', function () {
+                    if(correo != ""){
+                      app.dialog.prompt('Agregue un nombre para este sitio', 'Guardar dirección', function (name) {
+                          nombreFavorito=name;
+                          var z=1;
+                          if(z==1){
+                          fnGuardarFavorito(name);
+                          }
+                          app.dialog.alert( name + ' ha sido guardado', "Listo");
+                          //nombreFavorito = name;
+                          //console.log(name);
+                      });
+                    }else{
+                      app.dialog.alert('Para acceder a esta funcion debes estar registrado','Lo siento');
+                    };
+                  });  
+              });
+
+    };
+
     function crearDynamicSheet(){
         d=1;
         console.log("entro a createDyamicSheet");
@@ -1156,13 +1430,96 @@ objects: marcadores
                   console.log(coordenadas);
                   //fnGuardarFavorito();
                   $$('.open-prompt').on('click', function () {
-                    app.dialog.prompt('Agregue un nombre para guardar este sitio', function (name) {
-                        fnGuardarFavorito(name);
-                        app.dialog.alert('Listo,' + name+ 'ha sido guardado');
-                        //nombreFavorito = name;
-                        //console.log(name);
-                    });
-                  });  
+                    if(correo != ""){
+                      app.dialog.prompt('Agregue un nombre para este sitio', 'Guardar dirección', function (name) {
+                          nombreFavorito=name;
+                          var z=1;
+                          if(z==1){
+                          fnGuardarFavorito(name);
+                          };
+                          app.dialog.alert( name + ' ha sido guardado', "Listo");
+                          //nombreFavorito = name;
+                          //console.log(name);
+                      });
+                    }else{
+                      app.dialog.alert('Para acceder a esta funcion debes estar registrado','Lo siento');
+                    };
+                  }); 
+              });
+
+    };
+
+    function crearDynamicSheetRuta(){
+        d=1;
+        console.log("entro a createDyamicSheet");
+              dynamicSheet = app.sheet.create({
+                El: ".hojamarcador",
+                backdropEl: ".contenedormapa",
+                swipeToClose: true,
+                swipeToStep: true,
+                 backdrop: true,
+                 closeByOutsideClick:false,
+                swipeHandler: ".swipe-handler",
+                content:  '<div class="sheet-modal my-sheet-swipe-to-close" style="height:auto; --f7-sheet-bg-color: #fff; opacity:0.95">'+
+                            '<div class="swipe-handler">'+  
+                              '<div class="sheet-modal-inner">'+
+                                '<div class="sheet-modal-swipe-step">'+
+                                  '<div class="block">'+
+                                    '<h2>'+label+'</h2>'+
+                                    '<div class="row no-gap display-flex flex-direction-row justify-content-space-around">'+
+                                      
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="GuardarFavorito open-prompt boton button button-round button-fill color-blue no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">star</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-blue" >GUARDAR</p>'+
+                                      '</div>'+
+                                      '<div class="display-flex flex-direction-column justify-content-center align-items-center">'+
+                                        '<div class="col-50 activarAlarma boton button button-round button-fill color-yellow no-margin no-padding display-flex align-content-center align-items-center justify-content-center" style="width: 55px; height: 55px; border-radius: 50;} ---"><i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">bell</i></div>'+
+                                        '<p class="padding-half display-flex align-content-center align-items-center justify-content-center text-color-yellow" >ALARMA</p>'+
+                                      '</div>'+
+                                    '</div>'+ 
+                                  '</div>'+
+                                '</div>'+
+                              '</div>'+
+                            '</div>'+
+                          '</div>',
+              });
+              dynamicSheet.open();
+              $$(".crearRuta").on('click',function(){
+                  crearRuta(this.id);
+                  dynamicSheet.close();
+                  //map.removeObject(marker); 
+                  if (u==1){
+                    container3.removeAll();
+                  }; 
+                  if (n==1){
+                    container2.removeAll();
+                  }; 
+              });
+              $$(".activarAlarma").on('click',function(){
+                  console.log("hiciste click en activar alarma");
+                  activarAlarma();  
+              });
+              $$(".GuardarFavorito").on('click',function(){
+                  console.log(locationId);
+                  console.log(label);
+                  console.log(coordenadas);
+                  //fnGuardarFavorito();
+                  $$('.open-prompt').on('click', function () {
+                    if(correo != ""){
+                      app.dialog.prompt('Agregue un nombre para este sitio', 'Guardar dirección', function (name) {
+                          nombreFavorito=name;
+                          var z=1;
+                          if(z==1){
+                          fnGuardarFavorito(name);
+                          };
+                          app.dialog.alert( name + ' ha sido guardado', "Listo");
+                          //nombreFavorito = name;
+                          //console.log(name);
+                      });
+                    }else{
+                      app.dialog.alert('Para acceder a esta funcion debes estar registrado','Lo siento');
+                    };
+                  });
               });
 
       };
@@ -1227,13 +1584,13 @@ objects: marcadores
           startMarker = new H.map.Marker({
             lat: startPoint.latitude,
             lng: startPoint.longitude
-          });
+          }, {icon: marcadorStartMarker});
 
           // Create a marker for the end point:
           endMarker = new H.map.Marker({
             lat: endPoint.latitude,
             lng: endPoint.longitude
-          });
+          }, {icon: marcadorEndMarker});
           endMarker.setData(endPoint.latitude+","+endPoint.longitude);
           endMarker.addEventListener('tap', abrirDynamicSheet);
           // Add the route polyline and the two markers to the map:
@@ -1252,14 +1609,14 @@ objects: marcadores
         
         
 
-        $$(".page").append('<div class="cancelarRuta fab fab-left-bottom color-red">'+
+        $$(".page").append('<div class="fabRuta fab fab-left-bottom color-red">'+
           '<a href="#">'+
-            
-            '<i class="icon  f7-icons if-not-md">xmark</i>'+
-            
-            '<i class="icon cancelarRuta material-icons md-only">close</i>'+
+            '<i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">arrow_turn_up_right</i>'+
+            '<i class="f7-icons size-22 no-margin no-padding align-content-center align-items-center justify-content-center">arrow_turn_up_right</i>'+
           '</a>'+
-
+          '<div class="fab-buttons fab-buttons-top">'+
+            '<a class="cancelarRuta" href="">X</a>'+
+          '</div>'+
         '</div>');
         $$(".cancelarRuta").on('click', cancelarRuta);
         // Call calculateRoute() with the routing parameters,
@@ -1302,8 +1659,8 @@ objects: marcadores
             if (f==1){
                   container4.removeAll();
                 };
-            if (d==1){
-              dynamicSheet.close();
+            if (g==1){
+              dynamicSheet.close()
             };
             console.log("coordenadas"+coordenadas);
           /*
@@ -1334,7 +1691,7 @@ objects: marcadores
                   label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
                   //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
                   if (g==1){
-                    crearDynamicSheet();
+                    crearDynamicSheetRuta();
                     
                   };
                 }, function (error) {
@@ -1359,7 +1716,7 @@ objects: marcadores
     function cancelarRuta(){
       map.removeObjects([routeLine, startMarker, endMarker]);
       console.log("entro a cancelar ruta")
-      $$(".cancelarRuta").remove();
+      $$(".fabRuta").remove();
       ruta=0;
     };
     function getDistanciaMetros(lat1,lon1,lat2,lon2){
@@ -1489,7 +1846,8 @@ objects: marcadores
 
 
               if (toggle.checked) {
-                
+                losalertdealarma=1;
+                dialogAlerta =1
                 if (u==1){
                     container3.removeAll();
                 }; 
@@ -1507,25 +1865,98 @@ objects: marcadores
                   coordsAlarma = {lat: latAlarma1, lng: lonAlarma1};
                   markerAlarma = new H.map.Marker(coordsAlarma , { icon: marcadorAlarma });
                   map.addObject(markerAlarma);
+                  markerAlarma.setData(latAlarma1+","+lonAlarma1);
+                  markerAlarma.addEventListener('tap', abrirDynamicSheetAlarma);
                 };
                 console.log("toggle checked"+distanciaAlarma);
                 alarma=1;
                 
-                app.dialog.alert('Te avisaremos cuando estes a '+distanciaAlarmaParaMostrar+" "+ "<font style='text-transform: lowercase;''>"+metrosOkilometrosParaMostrar+"</font>" ,"¡Listo!")
-                if (metrosOkilometros=="Kilometros"){
+                app.dialog.alert('Tu alarma sonará cuando estes a '+distanciaAlarmaParaMostrar+" "+ "<font style='text-transform: lowercase;''>"+metrosOkilometrosParaMostrar+"</font>" ,"¡Listo!")
+                if (metrosOkilometros=="Kilometro/s"){
                   distanciaAlarma=distanciaAlarma*1000;
                   
                 }
               }else{
                 alarma=0;
-                $$(".cancelarAlarma").remove();
+                
                 app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
               };
             }
           }
         })
 
-        
+        function abrirDynamicSheetAlarma(evt){
+
+                // Log 'tap' and 'mouse' events:
+
+                //console.log(evt.target.getData());
+                coordenadas=evt.target.getData();
+                console.log(coordenadas);
+                console.log("entro")
+
+                //lat2=coord.lat;
+                //lon2=coord.lng;
+                if (u==1){
+                  //map.removeObject(marker);
+                };
+                
+                if(l==1){
+                map.removeObject(container);
+                };
+                
+              if (e==1){
+                dynamicSheet2.close();
+              };
+              if (f==1){
+                    container4.removeAll();
+                  };
+              if (g==1){
+                dynamicSheet.close()
+              };
+              console.log("coordenadas"+coordenadas);
+            /*
+            var bubble =  new H.ui.InfoBubble(coord, {
+                    content: '<b>Coordenadas:</b>'+coord.lat+", "+ coord.lng 
+                   });
+            
+            ui.addBubble(bubble); */
+             //addMarker(coord);
+              
+            function reverseGeocode2(platform) {
+              console.log("entro a reversegeocode");
+                var geocoder = platform.getGeocodingService(),
+                  parameters = {
+                    prox: coordenadas+",57",
+                    mode: 'retrieveAddresses',
+                    maxresults: '1',
+                    gen: '9'};
+
+                geocoder.reverseGeocode(parameters,
+                  function (result) {
+                    g=1;
+                    console.log("aca estamos");
+                    console.log(JSON.stringify(result.Response.View[0].Result[0].Location.LocationId));
+                    locationId=JSON.stringify(result.Response.View[0].Result[0].Location.LocationId);
+                    console.log("locationId"+locationId)
+                    console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label));
+                    label= JSON.stringify(result.Response.View[0].Result[0].Location.Address.Label);
+                    //console.log(JSON.stringify(result.Response.View[0].Result[0].Location.Address.Street));
+                    if (g==1){
+                      crearDynamicSheetBusquedaLongpress();
+                      
+                    };
+                  }, function (error) {
+                    alert(error);
+                  }
+                );
+                
+            };
+            reverseGeocode2(platform);
+          /*
+          console.log("entro al evento del marcador");
+          dynamicSheet.open();
+          */
+        }
         
 
         //activo alarma
@@ -1590,38 +2021,49 @@ objects: marcadores
 
           
           $$(".cancelarAlarma").on('click', function(){
-            if (a==1){
-                  map.removeObject(markerAlarma);
-                  a=0;
-                };
-            alarma=0;
-            var desactivar=1;
-            if(desactivar==1){
-              desactivar=0;
-              $$(".contenedorFab").remove();
-              fab=0;
-              //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+            if (losalertdealarma==1){
+              app.dialog.confirm('¿Estas seguro que querés desactivar tu alarma?',"Atencion", function () {
+                if (a==1){
+                      map.removeObject(markerAlarma);
+                      a=0;
+                    };
+                alarma=0;
+                var desactivar=1;
+                if(desactivar==1){
+                  desactivar=0;
+                  $$(".contenedorFab").remove();
+                  fab=0;
+                  //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+                }
+              })
+                app.dialog.alert('Tu alarma se desactivó' , "Listo");
+              losalertdealarma=0
             }
           });
+
+           
+
           if(distancia <= distanciaAlarma){
             
             var pasado = distanciaAlarma - distancia;
-            //app.dialog.alert('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!" );
-            app.dialog.confirm('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!", function () {
-              if (a==1){
-                map.removeObject(markerAlarma);
-                a=0;
-              };
-              alarma=0;
-              var desactivar=1;
-              if(desactivar==1){
-                desactivar=0;
-                $$(".contenedorFab").remove();
-                fab=0;
-                //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
-              }
-              app.dialog.alert('Tu alarma se desactivó' , "Listo");
-            });
+            if (dialogAlerta ==1){
+              app.dialog.confirm('Ya estas a '+distanciaParaMostrar+' '+unidad+' de tu destino',"¡Atento!", function () {
+                if (a==1){
+                  map.removeObject(markerAlarma);
+                  a=0;
+                };
+                alarma=0;
+                var desactivar=1;
+                if(desactivar==1){
+                  desactivar=0;
+                  $$(".contenedorFab").remove();
+                  fab=0;
+                  //app.dialog.alert('Tu alarma de desactivó',"¡Listo!" );
+                }
+                app.dialog.alert('Tu alarma se desactivó' , "Listo");
+              });
+              dialogAlerta=0;
+            };
             console.log("ya llegas. tu alarma se activo hace:"+pasado+" metros");
             console.log("estas a "+distancia+" metros de tu destino")
             //NOTIFICACION
@@ -1649,18 +2091,18 @@ objects: marcadores
                               '<div class="sheet-modal-inner">'+
                                 '<div class="sheet-modal-swipe-step">'+ 
                                 '<div class="block">'+
-                                '<h2>Activa tus alarmas</h2>'+
+                                '<h2>Activa una alarma</h2>'+
                                 '<div class="block-footer class="no-margin-bottom"">'+
-                                  '<p class="no-margin-bottom">Selecciona a qué distancia de tu destino querés recibir tus avisos y activalas deslizando el interruptor</p>'+
+                                  '<p class="no-margin-bottom">Selecciona a qué distancia de tu destino querés recibir el aviso, activala deslizando el interruptor y disfrutá del viaje</p>'+
                                 '</div>'+
-                                  '<div class="no-margin-top no-padding-top list simple-list ">'+
-                                        '<p class="text-align-center margin-bottom-half no-padding">ALARMA 1</p>'+
+                                  '<div class="list simple-list ">'+
+                                        
                                         '<ul>'+
                                           '<li>'+
                                             '<div class="item-content">'+
                                               '<div class="item-media"><i class="icon icon-f7"></i></div>'+
                                               '<div class="item-inner">'+
-                                                '<input type="text"  placeholder="Elija la distancia" readonly="readonly" id="demo-picker-describe"/>'+
+                                                '<input type="text"  placeholder="Indicá la distancia" readonly="readonly" id="demo-picker-describe"/>'+
                                                 '<div class="item-after">'+
                                                   '<label class="toggleAlarma1 toggle toggle-init disabled">'+
                                                     '<input type="checkbox"/>'+
@@ -1674,7 +2116,7 @@ objects: marcadores
                                           
                                         '</ul>'+
                                         '<div >'+
-                                              '<p class="block-footer">Antes de activar la alarma verificá nuevamente la distancia seleccionada</p>'+
+                                              '<p class="block-footer">Verificá haber seleccionado la distancia correcta</p>'+
                                             '</div>'+
                                       '</div>'+
                                   '</div>'+
@@ -1688,11 +2130,11 @@ objects: marcadores
               sheetAlarmas.open();
               
               var pickerDescribe = app.picker.create({
-                  toolbar: true,
-                  push:true,
-                  backdrop:true,
-                  toolbarCloseText: 'Desliza hacia abajo para cerrar',
-                  sheetSwipeToClose:true,
+                  toolbar:false,
+                  
+                  
+                  toolbarCloseText: '<div class="cerrarPicker">Desliza hacia abajo para cerrar</div>',
+                  sheetSwipeToClose:false,
                   inputEl: '#demo-picker-describe',
                   rotateEffect: false,
                   closeByOutsideClick: true,
@@ -1708,10 +2150,10 @@ objects: marcadores
                   cols: [
                     {
                       textAlign: 'left',
-                      values: ('5 10 15 20 30 40 50 60 100 200 300 400 500').split(' ')
+                      values: ('1 2 3 4 5 10 15 20 30 40 50 60 100 200 300 400 500').split(' ')
                     },
                     {
-                      values: ('Metros Kilometros').split(' ')
+                      values: ('Metros Kilometro/s').split(' ')
                     },
                   ],
                   on: {
@@ -1795,7 +2237,7 @@ objects: marcadores
                       '<div class="popover-inner">'+
                         '<div class="list">'+
                           '<ul id="resultados">'+
-                            '<li><a class="list-button item-link " id="cerrarPopover" href="#">Elegir en el mapa</a></li>'+
+                            '<li><a class="list-button item-link " id="cerrarPopover" href="#">Seleccione una opción</a></li>'+
                           '</ul>'+
                         '</div>'+
                       '</div>'+
@@ -2094,7 +2536,7 @@ objects: marcadores
             .then(function(){   
                 //En caso de que esté correcto el inicio de sesión y no haya errores, se dirige a la siguiente página
                 if(huboError == 0){
-                  $$("#user").text(iniciales);
+                  //$$("#user").append(iniciales);
                   console.log("te logueaste");
                   
                   $$("#nombreUsuario").text(u);
