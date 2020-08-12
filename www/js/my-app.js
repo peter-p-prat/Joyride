@@ -190,7 +190,7 @@ $$(document).on('deviceready', function() {
 
    
     //$$("#google").on('click', loginConGoogle()); // VA SIN LOS ()
-    $$("#google").on('click', loginConGoogle);
+    
 
    
 
@@ -205,7 +205,7 @@ $$(document).on('page:init', function (e) {
     refUsuarios = db.collection("USUARIOS");
     refTiposUsuarios= db.collection("TIPOS_USUARIOS");
     refFavoritos=db.collection("LUGARES_FAVORITOS");
-
+    $$("#google").on('click', loginConGoogle);
     $$('#enviarRegistro').on('click', crearRegistro);
     
     var panel = app.panel.create({
@@ -724,7 +724,7 @@ function crearRegistro(){
           var user = result.user;
           // ...
           mensajesLoginGoogle();
-          console.log("te logueaste "+ user);
+          console.log("te logueaste "+JSON.stringify( result.user));
           alert("te logueaste "+ user);
         }
         })
@@ -739,7 +739,7 @@ function crearRegistro(){
           // The firebase.auth.AuthCredential type that was used.
           var credential = error.credential;
           // ...
-          mensajesLoginGoogle();
+          console.log("hubo error")
         });
     };
 
